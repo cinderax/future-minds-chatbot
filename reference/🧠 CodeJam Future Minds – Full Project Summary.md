@@ -95,4 +95,155 @@ Start with Langflow to prototype, then **convert to Python** for full control an
 
 ---
 
-**Need help with architecture, code, or prompts? I’ve got your back.**
+---
+
+## 📁 Folder Structure
+
+```
+future-minds-chatbot/
+├── data/
+│   ├── textbook.pdf
+│   └── queries.json
+├── embeddings/
+│   └── faiss_index/
+├── agents/
+│   ├── rag_agent.py
+│   ├── planner_agent.py
+│   ├── summarizer_agent.py
+│   └── reference_mapper.py
+├── utils/
+│   ├── pdf_parser.py
+│   ├── embedding_utils.py
+│   ├── retrieval_utils.py
+│   └── prompt_templates.py
+├── app/
+│   ├── main.py
+│   └── interface.py
+├── outputs/
+│   ├── answers.csv
+│   └── logs/
+├── README.md
+├── requirements.txt
+└── .env  # Gemini API key
+```
+
+---
+
+## 🚀 Step-by-Step Build Path
+
+### ✅ STEP 1: Textbook Parsing & Chunking
+
+> `utils/pdf_parser.py`
+
+- Use `pdfplumber` or `PyMuPDF`
+- Chunk the book by headers/subsections
+- Add metadata: `section`, `page`
+- Output: list of {text, section, page}
+
+### ✅ STEP 2: Embedding + Vector DB
+
+> `utils/embedding_utils.py`
+
+- Use `sentence-transformers` or Gemini’s embedding model
+- Store vectors in **FAISS** index
+- Save metadata: `section`, `page`, `chunk_id`
+
+### ✅ STEP 3: Retrieval Logic
+
+> `utils/retrieval_utils.py`
+
+- Given a query, embed it
+- Retrieve top-k most similar vectors using FAISS
+- Return matching chunks and metadata
+
+### ✅ STEP 4: RAG Agent
+
+> `agents/rag_agent.py`
+
+- Receive a query
+- Call `retrieval_utils.py` to get top chunks
+- Format prompt with chunks (few-shot if needed)
+- Use Gemini 1.5 Flash API
+- Return: `answer`, `context`, `section_refs`, `pages`
+
+### ✅ STEP 5: Planner Agent
+
+> `agents/planner_agent.py`
+
+- Input: query
+- Output: list of subqueries (if compound)
+- Use Gemini or rule-based logic
+
+### ✅ STEP 6: Summarizer Agent
+
+> `agents/summarizer_agent.py`
+
+- Input: list of long context chunks
+- Output: summarized version under token limit
+
+### ✅ STEP 7: Reference Mapper Agent
+
+> `agents/reference_mapper.py`
+
+- Input: context chunks
+- Output: list of `section`, `page` pairs
+- Ensures citation traceability
+
+### ✅ STEP 8: Main Pipeline
+
+> `app/main.py`
+
+- Load FAISS, initialize all agents
+- Read `queries.json`
+- For each query:
+  - Pass to `planner_agent`
+  - Each subquery goes through `rag_agent`
+  - Use `reference_mapper` to fetch references
+- Output: Format to `answers.csv`
+
+### ✅ STEP 9: Interface (Optional)
+
+> `app/interface.py`
+
+- Build with Streamlit or Flask
+- Input: user query
+- Output: chatbot answer + context + references
+
+---
+
+## 🧪 Evaluation Cheatsheet
+
+| Metric             | Strategy                                                    |
+|-------------------|-------------------------------------------------------------|
+| Answer Correctness| Use high-quality prompts, test multiple variants            |
+| Context Precision | Chunk smartly, filter garbage, rerank with hybrid search    |
+| Faithfulness      | Force model to “stick to” retrieved context only            |
+| Reference Accuracy| Track metadata, map sections and pages properly             |
+| Innovation        | Add planner, summarizer, reference agents. Show real flow.  |
+
+---
+
+## 📦 Final Deliverables Checklist
+
+- [ ] `answers.csv` → formatted: ID, Context, Answer, Sections, Pages
+- [ ] GitHub Repo → clean, documented, reproducible
+- [ ] Demo Video ≤ 15 min → walkthrough + live demo
+- [ ] (Optional) Langflow JSON if used
+- [ ] README with setup instructions
+
+---
+
+## 🔑 Requirements.txt (Starter)
+```txt
+faiss-cpu
+PyMuPDF
+sentence-transformers
+openai
+pandas
+python-dotenv
+streamlit
+flask
+```
+Add `google.generativeai` if using Gemini official SDK.
+
+---
