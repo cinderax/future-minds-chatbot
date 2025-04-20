@@ -74,6 +74,13 @@ def extract_chunks_with_metadata(pdf_path, chunk_size, min_sentence_length):
 
     return chunks
 
+def clean_text(text):
+    # Remove repeated characters like "MMMaaacccaaadddaaammm"
+    text = re.sub(r'(.)\1{2,}', r'\1', text)
+    # Optional: Strip weird characters, double spaces, etc.
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+
 
 def save_chunks_to_csv(chunks, csv_path):
     """
@@ -101,10 +108,12 @@ def save_chunks_to_json(chunks, json_path):
     print(f"Chunks saved to JSON: {json_path}")
 
 if __name__ == "__main__":
-    pdf_path = "data/textbook.pdf"
+    pdf_path = "../data/textbook.pdf"
     chunk_size = 5
     min_sentence_length = 30
     chunks = extract_chunks_with_metadata(pdf_path,chunk_size, min_sentence_length)
+    for chunk in chunks:
+        chunk["text"] = clean_text(chunk["text"])
     # print(chunks[:3])
-    save_chunks_to_csv(chunks, "data/chunks.csv")
-    save_chunks_to_json(chunks, "data/chunks.json")
+    save_chunks_to_csv(chunks, "../data/chunks.csv")
+    save_chunks_to_json(chunks, "../data/chunks.json")

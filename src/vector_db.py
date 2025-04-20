@@ -81,3 +81,9 @@ class VectorDB:
             n_results=n_results
         )
         return results['documents'][0]
+    
+# if __name__ == "__main__":
+#     db = VectorDB(csv_path="data/chunks.csv")
+#     result = db.query("who is hitler?")
+#     for i, doc in enumerate(result, 1):
+#         print(f"[{i}] {doc}")
