@@ -100,13 +100,11 @@ def save_chunks_to_json(chunks, json_path):
         json.dump(chunks, f, ensure_ascii=False, indent=4)
     print(f"Chunks saved to JSON: {json_path}")
 
-
-# If you want to test this module standalone, uncomment below:
-# if __name__ == "__main__":
-#     pdf_path = "../data/textbook.pdf"
-#     chunk_size = 5
-#     min_sentence_length = 30
-#     chunks = extract_chunks_with_metadata(pdf_path,chunk_size, min_sentence_length)
-#     print(chunks[:3])
-#     save_chunks_to_csv(chunks, "chunks.csv")
-#     save_chunks_to_json(chunks, "chunks.json")
+if __name__ == "__main__":
+    pdf_path = "data/textbook.pdf"
+    chunk_size = 5
+    min_sentence_length = 30
+    chunks = extract_chunks_with_metadata(pdf_path,chunk_size, min_sentence_length)
+    # print(chunks[:3])
+    save_chunks_to_csv(chunks, "data/chunks.csv")
+    save_chunks_to_json(chunks, "data/chunks.json")
