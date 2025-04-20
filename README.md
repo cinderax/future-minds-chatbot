@@ -10,7 +10,8 @@ nltk.download('punkt')
 ~~~
 
 - add this code to end of the pdf_chunker.py to check if it is working correctly.
-~~~ if __name__ == "__main__":
+~~~ 
+if __name__ == "__main__":
     chunks = extract_chunks_with_metadata(pdf_path, chunk_size, min_sentence_length)
     print(f"Extracted {len(chunks)} chunks.")
     print("Sample output:")
