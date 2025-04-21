@@ -42,14 +42,16 @@ This project is an AI-powered chatbot designed to answer academic queries about 
 ## Installation
 
 1. Clone the repository:
-   ```bash
+   ```
    git clone https://github.com/your-username/your-repository.git
    cd your-repository
+   ```
 
-	2.	Install dependencies:
+2.	Install dependencies:
 
-pip install -r requirements.txt
-
+	```
+	pip install -r requirements.txt
+	```
 
 
 Usage
