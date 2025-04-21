@@ -1,91 +1,135 @@
-# AI-Powered History Textbook Chatbot
+#FutureMinds Chatbot
 
-This project is an AI-powered chatbot designed to answer academic queries about a Grade 11 History textbook using a Retrieval-Augmented Generation (RAG) approach. It leverages ChromaDB for efficient vector storage and similarity search, and the Gemini-1.5-Flash model to generate context-aware answers.
+
+- An AI-powered educational assistant designed to answer student-level questions based on grade 11 History textbook content.  
+- This project uses custom PDF chunking, ChromaDB for vector storage, and Google Gemini for answer generation, creating a robust Retrieval-Augmented Generation (RAG) pipeline.
+
+---
 
 ## Features
 
-- **Query Answering**: Answer questions based on a PDF textbook using the Gemini-1.5-Flash model.
-- **Advanced Agents**: Includes multiple agents for query routing, context summarization, confidence ranking, and more.
-- **PDF Processing**: The system chunks the textbook into smaller, manageable pieces and stores them as vectors for fast retrieval.
-- **ChromaDB**: Uses ChromaDB as the vector database to store embeddings and perform similarity searches.
+- Extracts text chunks from PDFs using `pdfplumber` and `nltk` sentence tokenization.
+- Converts chunks into vector embeddings using open-source Sentence Transformers.
+- Stores embeddings in ChromaDB for fast semantic search.
+- Integrates with Google Gemini API to generate precise, context-aware answers.
+- Supports batch question answering and interactive web interface (Flask).
+- Fully modular and easy to extend.
+
+---
 
 ## Project Structure
 
-/your-chatbot-repo
+```
+FutureMinds-Chatbot/
 │
-├── README.md                   # Project overview and setup instructions
-├── requirements.txt            # Dependencies for the project
-├── main.py                     # (Optional) FastAPI app for interactive use/testing
-├── run_pipeline.py             # Core pipeline: loads queries, retrieves context, calls Gemini, and writes CSV
-├── pdf_chunker.py              # PDF chunking script
-├── vector_db.py                # Script to embed chunks and store vectors (ChromaDB)
-├── gemini_wrapper.py           # Wrapper for Gemini-1.5-Flash API
+├── data/
+│   ├── chunks.csv
+│   ├── chunks.json
+│   └── textbook.pdf
 │
-├── agents/                     # Folder for the advanced agents
-│   ├── query_planner.py        # Query-type planning agent
-│   ├── context_summarizer.py   # Context summarizer agent
-│   ├── confidence_ranker.py    # Answer confidence scorer/ranker
-│   ├── translator.py           # (Optional) Translator agent
-│   ├── sentiment_analyzer.py   # (Optional) Sentiment analyzer agent
+├── src/
+│   ├──chroma_db
+│   ├── app.py
+│   ├── batch_answer_generator.py
+│   ├── chunker.py
+│   └── vector_db.py
+|   |__ main.py
 │
-├── data/                       # Folder to store data files
-│   ├── queries.json            # The test queries for the competition
-│   ├── textbook.pdf            # The source textbook PDF
-│   └── chunks.csv              # Chunked and processed PDF data
+├── README.md
+├── requirements.txt
 │
-├── outputs/                    # Folder for outputs
-│   ├── submission.csv          # Final output for competition submission
-│   └── logs/                   # Logs for debugging, if any
 │
-└── .gitignore                  # Files/folders to ignore in version control
-
-## Installation
-
-1. Clone the repository:
-   ```
-   git clone https://github.com/your-username/your-repository.git
-   cd your-repository
-   ```
-
-2.	Install dependencies:
-
-	```
-	pip install -r requirements.txt
-	```
-
-
-Usage
-
-To process a set of queries and generate the final CSV, run the pipeline:
-
-python run_pipeline.py
-
-Optional: For Interactive Use
-
-If you’d like to interact with the system via a FastAPI app (for local testing), you can run:
-
-python main.py
-
-Dependencies
-	•	chromadb for vector storage and retrieval
-	•	gemini-1.5-flash for the question-answering model
-	•	pandas for handling CSV output
-	•	nltk, pdfplumber, and others for text chunking and PDF processing
-
-License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+├── templates/
+│   └── index.html
+│
+```
 
 ---
 
-### What's Covered Here:
-- **Overview**: Explains what the chatbot does and the tech stack.
-- **Project Structure**: A breakdown of the repo, like we discussed earlier.
-- **Installation**: Basic setup instructions for the repo.
-- **Usage**: How to run the core pipeline and optional interactive testing.
-- **Dependencies**: A list of major dependencies.
-- **License**: You can adjust or add licensing info as needed.
+## Setup Instructions
+
+### 1. Clone the repository
+
+```
+https://github.com/cinderax/future-minds-chatbot.git
+```
+
+### 2. Install dependencies
+
+```
+pip install -r requirements.txt
+```
+
+### 3. Set up API keys
+
+Create a `.env` file in the root directory containing:
+
+```
+GOOGLE_API_KEY=your_google_gemini_api_key_here
+```
+
+Load environment variables in your scripts using `python-dotenv` or your preferred method.
+
+### 4. Prepare data
+
+- Place your PDF textbooks in the `data/`  with name `teaxtbook.pdf`  folder.
+- Run `chunk_pdf.py` to extract chunks and save as `chunks.csv`.
+
+### 5. Build vector database
+
+- Use `vector_db.py` to load `chunks.csv` into ChromaDB and generate embeddings.
+
+### 6. Run batch answering
+
+```
+python batch_answer_generator.py
+```
+
+This will read questions from `Future-Minds-Sample-Submission.csv`, generate answers, and save them to `Future-Minds-Submission-Answers.csv`.
+
+### 7. (Optional) Run web app
+
+```
+python app.py
+```
+
+Open your browser at `http://127.0.0.1:5000` to interact with the chatbot.
 
 ---
 
-Let me know if we should add any specific details or if you're ready to move on to the next part of the setup!
+## Usage
+
+### Batch answering script
+
+```
+python batch_answer_generator.py
+```
+
+### Interactive chatbot (Flask)
+
+```
+python app.py
+```
+
+---
+
+## Dependencies
+
+- Python 3.8+
+- [pandas](https://pandas.pydata.org/)
+- [chromadb](https://github.com/chroma-core/chroma)
+- [sentence-transformers](https://www.sbert.net/)
+- [google-generativeai](https://pypi.org/project/google-generativeai/)
+- [flask](https://flask.palletsprojects.com/)
+- [nltk](https://www.nltk.org/)
+- [pdfplumber](https://github.com/jsvine/pdfplumber)
+- [python-dotenv](https://pypi.org/project/python-dotenv/)
+
+
+---
+
+## Contact
+
+For questions or collaboration, reach out at cinderax@icloud.com
+
+---
