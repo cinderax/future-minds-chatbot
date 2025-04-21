@@ -152,11 +152,11 @@ def save_chunks_to_json(chunks: List[Dict], json_path: str) -> None:
 
 
 if __name__ == "__main__":
-    PDF_PATH = "../data/textbook.pdf"  # Change to your PDF path
-    CHUNK_SIZE = 5
+    PDF_PATH = "data/textbook.pdf"  # Change to your PDF path
+    CHUNK_SIZE = 4
     MIN_SENTENCE_LENGTH = 30
-    CSV_PATH = "../data/chunks.csv"
-    JSON_PATH = "../data/chunks.json"
+    CSV_PATH = "outputs/chunks.csv"
+    JSON_PATH = "outputs/chunks.json"
 
     chunks = extract_chunks_with_metadata(
         pdf_path=PDF_PATH,
