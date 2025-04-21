@@ -1,4 +1,4 @@
-#FutureMinds Chatbot
+##FutureMinds Chatbot
 
 
 - An AI-powered educational assistant designed to answer student-level questions based on grade 11 History textbook content.  
