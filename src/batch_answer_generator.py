@@ -30,34 +30,8 @@ Please follow these instructions carefully:
 
 ---
 
-Example 1:
-Context:
-"There are so many coal mines in Britain. South Wales, Yorkshire, Lancashire are some places where coal mines are situated... Thomas Newcomen invented a steam engine in 1735 to pump water... James Watt developed this to a new steam engine in 1736... Humphry Davy produced the safety lamp in 1812... In 1839, a method was found to take coal out of the mines using iron cables instead of copper."
+[Examples omitted for brevity]
 
-Question:
-What were the key developments in the coal industry during the Industrial Revolution?
-
-Answer:
-Key developments in the coal industry during the Industrial Revolution included the invention of steam engines by Thomas Newcomen and improvements by James Watt, which helped pump water out of mines. Humphry Davy's safety lamp improved miner safety, and the introduction of iron cables in 1839 enhanced coal extraction. These innovations greatly increased mining efficiency and safety.
-
----
-
-Example 2:
-Context:
-"British people came to Sri Lanka and started mega scale cultivations. Many factories were started in connection to thus started cultivations such as tea, coconut, rubber and machines were imported from Britain to be used in those factories. Roads and railways were introduced... the Colombo–Kandy road was constructed... railway was started in 1858... postal system in 1815."
-
-Question:
-How did the Industrial Revolution affect Sri Lanka?
-
-Answer:
-The Industrial Revolution affected Sri Lanka by introducing large-scale plantation agriculture for crops like tea, coconut, and rubber. The British established factories and imported machinery to process these crops. Infrastructure such as roads, railways, and postal services was developed to support the plantations, leading to social and economic changes.
-
----
-You are a knowledgeable and approachable history teacher. If the student greets you or thanks you, respond warmly as a real teacher would.
-
-If the user gives input like “clear”, or if the system provides mismatched or confusing context, take a moment to think before answering. Remember, the user expects to be interacting with a real human—mistakes can happen.
-
-If you can’t understand the question, kindly ask the student to submit it again.
 ---
 
 Now, please answer the following question based on the context provided.
@@ -78,12 +52,24 @@ def generate_gemini_response(question: str, context: str) -> str:
     except Exception as e:
         return f"Error generating Gemini response: {str(e)}"
 
-def batch_answer_questions_from_json(input_json: str, output_csv: str, n_results: int = 5):
-    # Load questions from JSON file
-    with open(input_json, 'r', encoding='utf-8') as f:
-        questions_data = json.load(f)
+def load_questions(input_path: str, file_type: str):
+    questions_data = []
+    if file_type == "json":
+        with open(input_path, 'r', encoding='utf-8') as f:
+            questions_data = json.load(f)
+    elif file_type == "csv":
+        df = pd.read_csv(input_path)
+        for idx, row in df.iterrows():
+            questions_data.append({
+                "Id": row.get("Id") or row.get("id") or str(idx+1),
+                "Question": row.get("Question") or row.get("question")
+            })
+    else:
+        raise ValueError("Unsupported file type. Use 'json' or 'csv'.")
+    return questions_data
 
-    # Prepare list for output rows
+def batch_answer_questions(input_path: str, output_csv: str, file_type: str, n_results: int = 5):
+    questions_data = load_questions(input_path, file_type)
     output_rows = []
 
     for idx, item in enumerate(questions_data):
@@ -148,6 +134,8 @@ def batch_answer_questions_from_json(input_json: str, output_csv: str, n_results
     print(f"\nAll answers saved to: {output_csv}")
 
 if __name__ == "__main__":
-    input_json_path = "data/questions.json"  # Path to your questions JSON file
-    output_csv_path = "outputs/answers_output.csv"  # Desired output CSV path
-    batch_answer_questions_from_json(input_json_path, output_csv_path)
+    file_type = input("Enter input file type (json/csv): ").strip().lower()
+    input_path = input("Enter the path to your input file: ").strip()
+    output_name = input("Under what name do you want to save the output CSV file? (without extension): ").strip()
+    output_csv_path = f"outputs/{output_name}.csv"
+    batch_answer_questions(input_path, output_csv_path, file_type)
