@@ -2,20 +2,29 @@ from flask import Flask, request, jsonify, render_template
 from vector_db import VectorDB
 import google.generativeai as genai
 import os
+import sys
 
-# --- Gemini Setup ---
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from agents.summarizer import SummarizerAgent  # Import summarizer
+
+app = Flask(__name__)
+
+# --- Load API Key securely ---
 api_key = os.getenv("GOOGLE_API_KEY")
 if not api_key:
     raise EnvironmentError("GOOGLE_API_KEY not set in environment variables.")
 
+# --- Configure Gemini model ---
 genai.configure(api_key=api_key)
 model = genai.GenerativeModel("models/gemini-1.5-flash")
 
-# --- Vector DB Setup ---
-vdb = VectorDB(csv_path="outputs/chunks.csv")  # Adjust path as needed
+# --- Initialize Vector DB ---
+vdb = VectorDB(csv_path="outputs/chunks.csv")  # Adjust path if needed
 
-app = Flask(__name__)
+# --- Initialize Summarizer Agent ---
+summarizer = SummarizerAgent()
 
+# --- Prompt Template ---
 PROMPT_TEMPLATE = """
 You are Ravi’s RAG Agent, an expert educational assistant specialized in history.
 
@@ -63,6 +72,10 @@ If you can’t understand the question, kindly ask the student to submit it agai
 
 Now, please answer the following question based on the context provided.
 
+When providing the answer, please structure it clearly and professionally. Use bullet points to list key facts or items, and include tables if appropriate to organize comparative or numerical data. Ensure the explanation is detailed, logically organized, and easy to understand for high school students. Avoid overly long paragraphs; instead, break down complex information into digestible sections with headings or lists where relevant.
+
+Please provide a detailed and comprehensive answer, including bullet points, tables if appropriate, and explanations. Aim for at least 6-10 sentences or more, covering all relevant aspects of the question based on the context.
+
 Context:
 {context}
 
@@ -86,16 +99,26 @@ def home():
 @app.route('/ask', methods=['POST'])
 def ask():
     data = request.json
-    question = data.get('question', '')
+    question = data.get('question', '').strip()
+    summary = data.get('summary', False)
+
     if not question:
         return jsonify({'error': 'No question provided'}), 400
 
+    # Retrieve relevant chunks from vector DB
     retrieved_chunks = vdb.query(question, n_results=5)
-    if not retrieved_chunks or all(not c.strip() for c in retrieved_chunks):
+    if not retrieved_chunks or all(not chunk.strip() for chunk in retrieved_chunks):
         return jsonify({'answer': "Sorry, I couldn't find relevant information for your question."})
 
     context = "\n".join(retrieved_chunks)
+
+    # Generate detailed answer from Gemini
     answer = generate_gemini_response(question, context)
+
+    # Summarize if requested
+    if summary:
+        answer = summarizer.summarize(answer)
+
     return jsonify({'answer': answer})
 
 if __name__ == '__main__':

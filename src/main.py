@@ -1,7 +1,11 @@
 import os
+import sys
 from dotenv import load_dotenv
 from vector_db import VectorDB
 import google.generativeai as genai
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from agents.summarizer import SummarizerAgent  # <-- Import summarizer
 
 # --- Load environment variables securely ---
 load_dotenv()
@@ -12,8 +16,8 @@ if not api_key:
 genai.configure(api_key=api_key)
 model = genai.GenerativeModel("models/gemini-1.5-flash")
 
-# --- Vector DB Setup ---
 vdb = VectorDB(csv_path="outputs/chunks.csv")  # Adjust path as needed
+summarizer = SummarizerAgent()  # <-- Initialize summarizer
 
 PROMPT_TEMPLATE = """
 You are Ravi’s RAG Agent, an expert educational assistant specialized in history.
@@ -62,6 +66,11 @@ If you can’t understand the question, kindly ask the student to submit it agai
 
 Now, please answer the following question based on the context provided.
 
+When providing the answer, please structure it clearly and professionally. Use bullet points to list key facts or items, and include tables if appropriate to organize comparative or numerical data. Ensure the explanation is detailed, logically organized, and easy to understand for high school students. Avoid overly long paragraphs; instead, break down complex information into digestible sections with headings or lists where relevant.
+
+Please provide a detailed and comprehensive answer, including bullet points, tables if appropriate, and explanations. Aim for at least 6-10 sentences or more, covering all relevant aspects of the question based on the context.
+
+
 Context:
 {context}
 
@@ -78,25 +87,25 @@ def generate_gemini_response(question: str, context: str) -> str:
     except Exception as e:
         return f"Error generating Gemini response: {str(e)}"
 
-def process_question(question: str):
+def process_question(question: str, summary: bool = False):
     print("\nProcessing the question...")
-
-    # Step 1: Retrieve relevant context from the Vector DB
     retrieved_chunks = vdb.query(question, n_results=5)
     if not retrieved_chunks or all(not c.strip() for c in retrieved_chunks):
         print("No relevant context found for your question. Please try rephrasing.")
         return
 
     context = "\n".join(retrieved_chunks)
-
-    # Step 2: Generate response using Gemini (final answer generation)
-    answer = generate_gemini_response(question, context)
-
-    # Step 3: Output the final answer to the user
+    detailed_answer = generate_gemini_response(question, context)
+    
     print("\n--- Context Used ---")
     print(context)
-    print("\n--- Answer ---")
-    print(answer)
+    print("\n--- Full Answer ---")
+    print(detailed_answer)
+    
+    if summary:
+        summary_answer = summarizer.summarize(detailed_answer)
+        print("\n--- Summary ---")
+        print(summary_answer)
 
 if __name__ == "__main__":
     print("FutureMinds chatbot is ready. Ask a question (type 'exit' to quit).")
@@ -105,5 +114,5 @@ if __name__ == "__main__":
         if question.lower() == 'exit':
             print("\nExiting chatbot...")
             break
-        else:
-            process_question(question)
+        want_summary = input("Do you want a summary? (y/n): ").lower() == 'y'
+        process_question(question, summary=want_summary)

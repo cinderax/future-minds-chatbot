@@ -4,115 +4,249 @@
   <meta charset="UTF-8" />
   <title>FutureMinds Chatbot</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
     * {
       box-sizing: border-box;
     }
 
     body {
-      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #f1f1f1;
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      color: #f0f0f5;
+      user-select: none;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 720px;
+      padding: 2.5rem 3rem;
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 2rem;
-      min-height: 100vh;
-      margin: 0;
+      animation: fadeIn 1s ease forwards;
     }
 
     h1 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-      background: linear-gradient(to right, #00c6ff, #0072ff);
+      font-weight: 600;
+      font-size: 2.75rem;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(90deg, #ff416c, #ff4b2b);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-    }
-
-    .chat-container {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 16px;
-      padding: 2rem;
-      max-width: 700px;
-      width: 100%;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(10px);
+      letter-spacing: 1.5px;
+      user-select: text;
     }
 
     textarea {
       width: 100%;
-      height: 100px;
-      resize: none;
+      min-height: 140px;
+      border-radius: 15px;
       border: none;
-      border-radius: 10px;
-      padding: 1rem;
-      font-size: 1rem;
-      background-color: rgba(255, 255, 255, 0.1);
+      padding: 1.25rem 1.5rem;
+      font-size: 1.1rem;
+      font-weight: 400;
+      resize: vertical;
+      background: rgba(255, 255, 255, 0.12);
       color: #fff;
-      outline: none;
-      margin-bottom: 1rem;
+      box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.15);
+      transition: background 0.3s ease;
+      outline-offset: 2px;
+      outline-color: #ff4b2b;
+      font-family: 'Poppins', sans-serif;
+    }
+    textarea::placeholder {
+      color: #ddd;
+      font-style: italic;
+    }
+    textarea:focus {
+      background: rgba(255, 255, 255, 0.22);
+      box-shadow: inset 0 0 12px rgba(255, 75, 43, 0.7);
+    }
+
+    .options {
+      margin: 1.25rem 0 1.75rem 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      user-select: none;
+    }
+
+    /* Custom toggle switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 28px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 34px;
+      transition: 0.4s;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #fff;
+      border-radius: 50%;
+      transition: 0.4s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    input:checked + .slider {
+      background: linear-gradient(90deg, #ff416c, #ff4b2b);
+      box-shadow: 0 0 12px #ff4b2b;
+    }
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    label[for="summary"] {
+      font-weight: 500;
+      font-size: 1rem;
+      color: #f0f0f5;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.3s ease;
+    }
+    label[for="summary"]:hover {
+      color: #ff4b2b;
     }
 
     button {
-      background: linear-gradient(to right, #ff416c, #ff4b2b);
-      color: white;
-      font-size: 1rem;
-      padding: 0.75rem 2rem;
+      background: linear-gradient(90deg, #ff416c, #ff4b2b);
       border: none;
+      padding: 0.85rem 2.5rem;
       border-radius: 50px;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #fff;
       cursor: pointer;
-      transition: background 0.3s ease;
+      box-shadow: 0 6px 15px rgba(255, 75, 43, 0.6);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+      user-select: none;
+      align-self: stretch;
     }
-
     button:hover {
-      background: linear-gradient(to right, #ff4b2b, #ff416c);
+      background: linear-gradient(90deg, #ff4b2b, #ff416c);
+      box-shadow: 0 8px 20px rgba(255, 65, 60, 0.8);
+    }
+    button:active {
+      transform: scale(0.98);
+      box-shadow: 0 4px 12px rgba(255, 65, 60, 0.7);
     }
 
     #answer {
       margin-top: 2rem;
-      white-space: pre-wrap;
-      background-color: rgba(255, 255, 255, 0.08);
-      padding: 1.5rem;
-      border-radius: 10px;
-      border-left: 4px solid #00c6ff;
-      font-size: 1rem;
+      width: 100%;
+      min-height: 140px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 15px;
+      padding: 1.75rem 2rem;
+      font-size: 1.1rem;
       line-height: 1.6;
-      min-height: 100px;
+      color: #fff;
+      box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.2);
+      white-space: pre-wrap;
+      user-select: text;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    @keyframes fadeIn {
+      0% {opacity: 0; transform: translateY(15px);}
+      100% {opacity: 1; transform: translateY(0);}
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 2rem 1.5rem;
+      }
+      h1 {
+        font-size: 2rem;
+      }
+      textarea, #answer {
+        font-size: 1rem;
+      }
+      button {
+        font-size: 1rem;
+        padding: 0.75rem 2rem;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>🤖 FutureMinds Chatbot</h1>
-  <div class="chat-container">
-    <textarea id="question" placeholder="Ask me anything about your textbook..."></textarea><br>
-    <button onclick="askQuestion()">Ask</button>
-    <div id="answer">Your answer will appear here...</div>
+  <div class="container" role="main" aria-label="FutureMinds Chatbot">
+    <h1>🤖 FutureMinds Chatbot</h1>
+
+    <textarea id="question" placeholder="Ask me anything about your textbook..." aria-label="Question input"></textarea>
+
+    <div class="options">
+      <label class="switch" for="summary">
+        <input type="checkbox" id="summary" aria-checked="false" />
+        <span class="slider" aria-hidden="true"></span>
+      </label>
+      <label for="summary">Get a summary instead of a full answer</label>
+    </div>
+
+    <button onclick="askQuestion()" aria-label="Submit question">Ask</button>
+
+    <div id="answer" aria-live="polite" aria-atomic="true">Your answer will appear here...</div>
   </div>
 
   <script>
     async function askQuestion() {
       const question = document.getElementById('question').value.trim();
+      const summary = document.getElementById('summary').checked;
+      const answerDiv = document.getElementById('answer');
+
       if (!question) {
         alert("Please enter a question.");
         return;
       }
 
-      document.getElementById('answer').innerText = "🧠 Thinking...";
+      answerDiv.textContent = "🧠 Thinking...";
 
       try {
         const response = await fetch('/ask', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question }),
+          body: JSON.stringify({ question, summary }),
         });
 
         const data = await response.json();
-        document.getElementById('answer').innerText = data.error
-          ? "❌ Error: " + data.error
-          : "✅ " + data.answer;
+
+        if (data.error) {
+          answerDiv.textContent = "❌ Error: " + data.error;
+        } else {
+          answerDiv.textContent = "✅ " + data.answer;
+        }
       } catch (err) {
-        document.getElementById('answer').innerText = "⚠️ Failed to reach the server.";
+        answerDiv.textContent = "⚠️ Failed to reach the server.";
       }
     }
   </script>

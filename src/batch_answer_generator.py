@@ -36,6 +36,10 @@ Please follow these instructions carefully:
 
 Now, please answer the following question based on the context provided.
 
+When providing the answer, please structure it clearly and professionally. Use bullet points to list key facts or items, and include tables if appropriate to organize comparative or numerical data. Ensure the explanation is detailed, logically organized, and easy to understand for high school students. Avoid overly long paragraphs; instead, break down complex information into digestible sections with headings or lists where relevant.
+
+Please provide a detailed and comprehensive answer, including bullet points, tables if appropriate, and explanations. Aim for at least 6-10 sentences or more, covering all relevant aspects of the question based on the context.
+
 Context:
 {context}
 

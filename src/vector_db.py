@@ -69,7 +69,7 @@ class VectorDB:
         except FileNotFoundError:
             raise FileNotFoundError(f"CSV file not found at: {self.csv_path}")
 
-    def query(self, query_text: str, n_results: int = 3) -> List[str]:
+    def query(self, query_text: str, n_results: int = 5) -> List[str]:
         """Query the vector database"""
         try:
             results = self.collection.query(
