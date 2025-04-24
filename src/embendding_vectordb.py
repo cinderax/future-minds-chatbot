@@ -14,83 +14,89 @@ class SentenceTransformerEmbeddingFunction:
         return embeddings.tolist()
 
 
-# ... [Keep all previous imports and classes] ...
-
 def create_chroma_db(json_file_path, collection_name):
-    # Load JSON file and validate
+    # Load JSON file
     try:
         with open(json_file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
             chunks_data = data.get("chunks", [])
-        if not chunks_data:
-            print("Error: No 'chunks' key or empty list in JSON")
-            return None
-    except Exception as e:
-        print(f"Error loading JSON: {str(e)}")
+    except FileNotFoundError:
+        print(f"Error: File not found at {json_file_path}")
+        return None
+    except json.JSONDecodeError:
+        print(f"Error: Invalid JSON format in {json_file_path}")
         return None
 
-    # Initialize ChromaDB client
+    # Initialize ChromaDB client with persistent path
     client = chromadb.PersistentClient(path="processed_data/chroma_db")
 
-    # Delete existing collection if present
+    # Delete existing collection if it exists
     try:
         client.delete_collection(name=collection_name)
         print(f"Deleted existing collection: {collection_name}")
-    except Exception as e:
-        print(f"No existing collection to delete: {str(e)}")
+    except Exception:
+        pass  # no collection to delete
 
-    # Create collection with proper name
+    # Create collection with embedding function
     embedding_function = SentenceTransformerEmbeddingFunction()
     collection = client.create_collection(
         name=collection_name,
         embedding_function=embedding_function
     )
 
-    # Prepare documents, metadatas, and IDs
     documents = []
     metadatas = []
     ids = []
-    
+
     for i, chunk in enumerate(chunks_data):
-        if isinstance(chunk, str) and chunk.strip():
-            documents.append(chunk.strip())
-            metadatas.append({"source": "your_source_here"})
+        if isinstance(chunk, dict):
+            text = chunk.get("text", "").strip()
+            if not text:
+                print(f"Skipping empty chunk at index {i}")
+                continue
+
+            metadata = {
+                "source": "your_source_here",
+                "page_number": chunk.get("page_number"),
+                "section": chunk.get("section"),
+                "subsection": chunk.get("subsection"),
+                "chapter": chunk.get("chapter"),
+                "chunk_id": chunk.get("chunk_id"),
+                "chunk_index": chunk.get("chunk_index")
+            }
+
+            documents.append(text)
+            metadatas.append(metadata)
             ids.append(f"doc_{i}")
+        else:
+            print(f"Skipping non-dict chunk at index {i}")
 
     if not documents:
-        print("No valid documents to add.")
-        return None
+        print("No valid chunks found to add to the collection.")
+        return collection
 
-    # Batch add documents
     batch_size = 100
-    for batch_idx in range(0, len(documents), batch_size):
-        batch_end = batch_idx + batch_size
+    for i in range(0, len(documents), batch_size):
+        end_idx = min(i + batch_size, len(documents))
         collection.add(
-            documents=documents[batch_idx:batch_end],
-            metadatas=metadatas[batch_idx:batch_end],
-            ids=ids[batch_idx:batch_end]
+            documents=documents[i:end_idx],
+            metadatas=metadatas[i:end_idx],
+            ids=ids[i:end_idx]
         )
-        print(f"Added batch {batch_idx//batch_size + 1}/{(len(documents)-1)//batch_size + 1}")
+        print(f"Added batch {i // batch_size + 1} / {(len(documents) + batch_size - 1) // batch_size}")
 
-    print(f"Created collection '{collection.name}' with {len(documents)} items")
+    print(f"Successfully created ChromaDB collection '{collection_name}' with {len(documents)} chunks")
     return collection
 
+
 if __name__ == "__main__":
-    json_file_path = input("JSON file path: ").strip()
-    collection_name = input("Collection name: ").strip()
-    
+    json_file_path = input("Json file path: ").strip()
+    collection_name = input("Collection Name: ").strip()
+
     collection = create_chroma_db(json_file_path, collection_name)
-    
+
     if collection:
-        # Verify collection name matches input
-        print(f"\nVerification:")
-        print(f"Requested name: {collection_name}")
-        print(f"Actual name:    {collection.name}")
-        print(f"Count:          {len(collection.get()['ids'])} items")
-        
-        # Check through client listing
-        client = chromadb.PersistentClient(path="processed_data/chroma_db")
-        collections = client.list_collections()
-        print("\nAll collections:")
-        for col in collections:
-            print(f"- {col.name} (ID: {col.id})")
+        print(f"Collection name: {collection.name}")
+        results = collection.get()
+        all_ids = results.get("ids", [])
+        print(f"Collection '{collection_name}' contains {len(all_ids)} items.")

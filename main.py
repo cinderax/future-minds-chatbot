@@ -28,13 +28,6 @@ def verify_collection(client, collection_name):
         }
 
 def main():
-    load_dotenv()
-
-    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-    if not GOOGLE_API_KEY:
-        print("ERROR: GOOGLE_API_KEY not set in environment.")
-        return
-
     collection_name = input("Enter the ChromaDB collection name to use: ").strip()
     if not collection_name:
         print("No collection name provided. Exiting.")
@@ -89,7 +82,7 @@ def main():
 
             print("\n--- Context Preview ---")
             context = result.get("context", "")
-            preview = (context[:250] + "...") if len(context) > 250 else context
+            preview = context
             print(preview)
 
         except Exception as e:

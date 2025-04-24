@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}RAG Assistant - Summarizer{% endblock %}
+
+{% block header %}Text Summarizer{% endblock %}
+
+{% block content %}
+<div class="summarizer-container">
+    <div class="input-section">
+        <form id="summarizer-form">
+            <div class="form-group">
+                <label for="text">Text to summarize:</label>
+                <textarea id="text" name="text" rows="8" placeholder="Paste a long article, paragraph, or any text you want to summarize..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="length">Summary length:</label>
+                <select id="length" name="length">
+                    <option value="brief">Brief (1-2 sentences)</option>
+                    <option value="short">Short (1 paragraph)</option>
+                    <option value="medium" selected>Medium (2-3 paragraphs)</option>
+                    <option value="detailed">Detailed (comprehensive)</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-compress-alt"></i> Summarize
+            </button>
+        </form>
+    </div>
+    
+    <div class="results-section" id="results-section" style="display: none;">
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p>Generating summary...</p>
+        </div>
+        
+        <div class="summary-container" id="summary-container" style="display: none;">
+            <h3>Summary</h3>
+            <div class="summary-content" id="summary-content"></div>
+            
+            <div class="action-buttons">
+                <button id="copy-btn" class="action-btn">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const summarizerForm = document.getElementById('summarizer-form');
+    const resultsSection = document.getElementById('results-section');
+    const loader = document.getElementById('loader');
+    const summaryContainer = document.getElementById('summary-container');
+    const summaryContent = document.getElementById('summary-content');
+    const copyBtn = document.getElementById('copy-btn');
+    
+    summarizerForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const text = document.getElementById('text').value.trim();
+        const length = document.getElementById('length').value;
+        
+        if (!text) {
+            alert('Please enter text to summarize.');
+            return;
+        }
+        
+        // Show results section and loader
+        resultsSection.style.display = 'block';
+        loader.style.display = 'flex';
+        summaryContainer.style.display = 'none';
+        
+        // Scroll to results
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+        
+        try {
+            const response = await fetch('/api/summarize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    text: text,
+                    length: length
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            // Display the summary
+            summaryContent.innerHTML = data.summary.replace(/\n/g, '<br>');
+            
+            // Hide loader and show summary
+            loader.style.display = 'none';
+            summaryContainer.style.display = 'block';
+            
+        } catch (error) {
+            console.error('Error:', error);
+            summaryContent.innerHTML = `<p class="error">Error: ${error.message || 'Failed to generate summary'}</p>`;
+            loader.style.display = 'none';
+            summaryContainer.style.display = 'block';
+        }
+    });
+    
+    // Copy to clipboard functionality
+    copyBtn.addEventListener('click', function() {
+        const textToCopy = summaryContent.innerText;
+        navigator.clipboard.writeText(textToCopy)
+            .then(() => {
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                }, 2000);
+            })
+            .catch(err => {
+                console.error('Failed to copy text:', err);
+                alert('Failed to copy text to clipboard');
+            });
+    });
+});
+</script>
+{% endblock %}

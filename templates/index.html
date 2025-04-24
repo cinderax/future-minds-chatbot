@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}RAG Assistant - Home{% endblock %}
+
+{% block header %}Welcome to RAG Assistant{% endblock %}
+
+{% block content %}
+<div class="welcome-container">
+    <p class="welcome-text">
+        This application provides various AI-powered tools to help with your study and productivity needs.
+    </p>
+    
+    <div class="features-grid">
+        <div class="feature-card">
+            <i class="fas fa-book feature-icon"></i>
+            <h3>History Q&A</h3>
+            <p>Ask questions about history and get accurate answers based on your textbooks.</p>
+            <a href="{{ url_for('history') }}" class="feature-button">Try Now</a>
+        </div>
+        
+        <div class="feature-card">
+            <i class="fas fa-language feature-icon"></i>
+            <h3>Translator</h3>
+            <p>Translate text between multiple languages with high accuracy.</p>
+            <a href="{{ url_for('translator') }}" class="feature-button">Try Now</a>
+        </div>
+        
+        <div class="feature-card">
+            <i class="fas fa-compress-alt feature-icon"></i>
+            <h3>Summarizer</h3>
+            <p>Get concise summaries of long texts, articles, or documents.</p>
+            <a href="{{ url_for('summarizer') }}" class="feature-button">Try Now</a>
+        </div>
+        
+        <div class="feature-card">
+            <i class="fas fa-tasks feature-icon"></i>
+            <h3>Task Planner</h3>
+            <p>Create detailed plans for your goals with timelines and resources.</p>
+            <a href="{{ url_for('planner') }}" class="feature-button">Try Now</a>
+        </div>
+        
+        <div class="feature-card">
+            <i class="fas fa-check-square feature-icon"></i>
+            <h3>To-Do List</h3>
+            <p>Manage your tasks with a simple and effective to-do list.</p>
+            <a href="{{ url_for('todo') }}" class="feature-button">Try Now</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
