@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 def extract_chunks_with_metadata(
     pdf_path: str,
-    chunk_size: int = 5,
-    min_sentence_length: int = 30,
+    chunk_size: int,
+    min_sentence_length: int,
     section_patterns: Optional[List[str]] = None
 ) -> List[Dict]:
     """
@@ -153,10 +153,11 @@ def save_chunks_to_json(chunks: List[Dict], json_path: str) -> None:
 
 if __name__ == "__main__":
     PDF_PATH = "data/textbook.pdf"  # Change to your PDF path
-    CHUNK_SIZE = 4
-    MIN_SENTENCE_LENGTH = 30
-    CSV_PATH = "outputs/chunks.csv"
-    JSON_PATH = "outputs/chunks.json"
+    CHUNK_SIZE = input("\nEnter Chunk Size: ")
+    MIN_SENTENCE_LENGTH = input("\nEnter Minimum Sentence Length: ")
+    NAME = input("\nWhich name should We save this file as? ")
+    CSV_PATH = f"outputs/{NAME}.csv"
+    JSON_PATH = f"outputs/{NAME}.json"
 
     chunks = extract_chunks_with_metadata(
         pdf_path=PDF_PATH,
