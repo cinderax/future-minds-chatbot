@@ -1,144 +1,192 @@
-# Future Minds Chatbot
+# 🤖 Future Minds Chatbot
 
-## Overview
+## 🧠 Overview
 
-Future Minds Chatbot is an AI-powered educational assistant designed to enhance learning experiences through multiple specialized agents. The system leverages modern natural language processing techniques, including retrieval-augmented generation (RAG), to provide accurate and contextually relevant responses to user queries.
+**Future Minds Chatbot** is an AI-powered educational assistant designed to enhance learning through a suite of intelligent agents. It leverages modern NLP techniques—including **hybrid retrieval-augmented generation (RAG)**—to deliver accurate, contextual, and helpful responses.
 
-## Features
+---
 
-### History Question Answering
+## ✨ Features
 
-The History Agent uses RAG technology to answer questions based on textbook content. It:
+### 📚 History Question Answering
 
-- Processes and indexes PDF textbooks
-- Retrieves relevant context for user questions
-- Generates accurate answers with source citations
-- Provides section and page references
+The **History Agent** uses a **hybrid RAG approach** combining:
 
-### Language Translation
+- 📄 **Offline context**: From processed and indexed PDF textbooks
+- 🌐 **Online context**: From approved educational websites
 
-The Translator Agent supports translation between multiple languages including:
+This two-tiered method delivers rich, citation-backed answers—even when the source textbook is limited.
 
-- English, Spanish, French, German, Italian
-- Portuguese, Russian, Japanese, Korean, Chinese
-- Arabic, Hindi, Bengali, Sinhala, Tamil
+✅ Key capabilities:
+- Relevant context retrieval  
+- Accurate answer generation with citations  
+- Section and page reference support  
 
-### Text Summarization
+---
 
-The Summarizer Agent condenses long texts into concise summaries with adjustable length settings.
+### 🌍 Language Translation
 
-### Study Planning
+The **Translator Agent** supports multilingual translation across:
 
-The Planner Agent helps create structured study plans with:
+🇬🇧 English | 🇪🇸 Spanish | 🇫🇷 French | 🇩🇪 German | 🇮🇹 Italian | 🇵🇹 Portuguese  
+🇷🇺 Russian | 🇯🇵 Japanese | 🇰🇷 Korean | 🇨🇳 Chinese | 🇸🇦 Arabic  
+🇮🇳 Hindi | 🇧🇩 Bengali | 🇱🇰 Sinhala | 🇮🇳 Tamil  
 
-- Goal-oriented planning
-- Deadline management
-- Resource allocation
+---
 
-### Task Management
+### 📝 Text Summarization
 
-The Todo Agent provides a simple yet effective task management system with:
+The **Summarizer Agent** condenses lengthy texts into clear, concise summaries.
 
-- Task creation with priorities
-- Due date tracking
-- Task completion status
+- 🧾 Adjustable length settings  
+- 📌 Highlights key points
 
-## Project Structure
+---
+
+### 📆 Study Planning
+
+The **Planner Agent** creates structured, goal-driven study plans:
+
+- 🎯 Goal tracking  
+- ⏰ Deadline management  
+- 📚 Resource allocation  
+
+---
+
+### ✅ Task Management
+
+The **Todo Agent** simplifies your workflow:
+
+- 🗂️ Task creation with priorities  
+- 🗓️ Due date tracking  
+- ✔️ Completion status updates  
+
+---
+
+## 🗂️ Project Structure
 
 ```
-├── agents/                  # AI agent implementations
-│   ├── history_agent.py     # RAG-based history Q&A agent
-│   ├── translator_agent.py  # Multi-language translation agent
-│   ├── summarizer_agent.py  # Text summarization agent
-│   ├── planner_agent.py     # Study planning agent
-│   └── todo_agent.py        # Task management agent
-├── data/                    # Source data files
-│   └── textbook.pdf         # Source textbook for history agent
-├── processed_data/          # Processed and indexed data
-│   └── chroma_db/           # Vector database for RAG
-├── src/                     # Core functionality modules
-│   ├── pdf_processing.py    # PDF extraction and processing
-│   ├── embendding_vectordb.py # Vector embedding utilities
-│   └── query_module.py      # Query processing module
-├── static/                  # Web application static assets
-│   ├── css/                 # Stylesheets
-│   └── js/                  # JavaScript files
-├── templates/               # HTML templates for web interface
-├── app.py                   # Flask web application
-└── main.py                  # Command-line interface
+├── agents/                      # 🤖 AI agent implementations
+│   ├── __init__.py
+│   ├── history_agent.py
+│   ├── planner_agent.py
+│   ├── summarizer_agent.py
+│   ├── todo_agent.py
+│   └── translator_agent.py
+├── data/                        # 📄 Raw input textbook
+│   └── textbook.pdf
+├── processed_data/              # 🧠 Vector DB data
+│   └── chroma_db/
+├── src/                         # 🛠️ Core functionality
+│   ├── __init__.py
+│   ├── batch_answer_genarator.py
+│   ├── collection_names.py
+│   ├── embending_vectordb.py
+│   ├── pdf_processing.py
+│   └── query_module.py
+├── static/                      # 🎨 Static assets
+│   ├── css/
+│   │   └── styles.css
+│   └── js/
+│       └── main.js
+├── templates/                   # 🖼️ HTML templates
+│   ├── base.html
+│   ├── history.html
+│   ├── index.html
+│   ├── planner.html
+│   ├── summarizer.html
+│   ├── todo.html
+│   └── translator.html
+├── .gitignore                   # ❌ Git exclusions
+├── app.py                       # 🚀 Flask web app
+├── main.py                      # 🧪 CLI entry point
+├── README.md                    # 📘 Project docs
+├── requirements.txt             # 📦 Python dependencies
 ```
 
-## Technology Stack
+---
 
-- **Backend**: Python, Flask
-- **Database**: ChromaDB (vector database)
-- **AI Models**: Google Gemini, SentenceTransformer
-- **PDF Processing**: PDFPlumber
-- **Frontend**: HTML, CSS, JavaScript
+## ⚙️ Technology Stack
 
-## Setup Instructions
+- **Backend**: 🐍 Python, Flask  
+- **Database**: 🧬 ChromaDB (vector DB)  
+- **AI Models**: 🧠 Google Gemini, SentenceTransformer  
+- **PDF Processing**: 📄 PDFPlumber  
+- **Frontend**: 🌐 HTML, CSS, JavaScript  
 
-### Prerequisites
+---
 
-- Python 3.8 or higher
+## 🚀 Setup Instructions
+
+### 🔧 Prerequisites
+
+- Python ≥ 3.8  
 - pip (Python package manager)
 
-### Installation
+---
 
-1. Clone the repository
+### 📥 Installation
 
-   ```
+1. **Clone the repository**
+
+   ```bash
    git clone https://github.com/yourusername/future-minds-chatbot.git
    cd future-minds-chatbot
    ```
 
-2. Install dependencies
+2. **Install dependencies**
 
-   ```
+   ```bash
    pip install -r requirements.txt
    ```
 
-3. Set up environment variables
-   Create a `.env` file in the project root with the following:
-   ```
+3. **Configure environment variables**
+
+   Create a `.env` file in the project root:
+
+   ```env
    GOOGLE_API_KEY=your_google_api_key_here
    ```
 
-### Usage
+---
 
-#### Web Interface
+## 💡 Usage
 
-Start the Flask web server:
+### 🌐 Web Interface
 
-```
+Start the Flask server:
+
+```bash
 python app.py
 ```
 
-Access the web interface at http://localhost:5000
+Then visit [http://localhost:5000](http://localhost:5000)
 
-#### Command Line Interface
+---
 
-For direct interaction with the history agent:
+### 🧪 Command Line Interface
 
-```
+Run the chatbot directly:
+
+```bash
 python main.py
 ```
 
-## Data Processing
+---
 
-To process a new textbook for the history agent:
+### 📘 Process a New Textbook
 
-1. Place the PDF file in the `data/` directory
-2. Run the processing script:
-   ```
-   python -m src.pdf_processing
-   ```
+1. Drop the PDF into the `data/` directory  
+2. Run:
 
-## License
+```bash
+python -m src.pdf_processing
+```
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+---
 
-## Acknowledgments
+## 🙌 Acknowledgments
 
-- This project was developed as part of the Future Minds educational initiative
-- Special thanks to all contributors and educational partners
+- Developed as part of the **Future Minds** educational initiative  
+- Huge thanks to our contributors and educational partners 💙
+
