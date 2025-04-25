@@ -72,7 +72,7 @@ class HistoryQuestionAnswerer:
         pages = []
         for meta in metadatas:
             section = meta.get("section")
-            page = meta.get("page")
+            page = meta.get("page_number")
             if section and section not in sections:
                 sections.append(section)
             if page and page not in pages:
