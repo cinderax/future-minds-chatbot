@@ -3,29 +3,32 @@
 
 /* Base Styles */
 :root {
-    --primary-color: #d6336c; /* Pink */
-    --primary-dark: #a82a55;
-    --primary-light: #e85a8a;
-    --secondary-color: #6c757d;
-    --success-color: #28a745;
-    --danger-color: #dc3545;
-    --warning-color: #ffc107;
-    --info-color: #17a2b8;
-    --light-color: #f8f9fa;
-    --dark-color: #343a40;
-    --gray-100: #f8f9fa;
-    --gray-200: #e9ecef;
-    --gray-300: #dee2e6;
-    --gray-400: #ced4da;
-    --gray-500: #adb5bd;
-    --gray-600: #6c757d;
-    --gray-700: #495057;
-    --gray-800: #343a40;
-    --gray-900: #212529;
-    --body-bg: #fff0f6; /* subtle pinkish white */
-    --text-color: #4a4a4a; /* dark gray for readability */
-    --shadow: 0 2px 8px rgba(214, 51, 108, 0.15); /* pinkish shadow */
-    --border-radius: 8px;
+    --primary-color: #ffffff; /* White */
+    --primary-dark: rgba(255, 255, 255, 0.8); /* Slightly transparent white */
+    --primary-light: rgba(255, 255, 255, 0.6); /* Even more transparent white */
+    --secondary-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white */
+    --accent-red: rgba(255, 87, 123, 0.8); /* Pink accent like in image */
+    --accent-blue: rgba(87, 157, 255, 0.8); /* Blue accent like in image */
+    --success-color: rgba(255, 255, 255, 0.7);
+    --danger-color: rgba(255, 255, 255, 0.7);
+    --warning-color: rgba(255, 255, 255, 0.6);
+    --info-color: rgba(255, 255, 255, 0.6);
+    --light-color: rgba(255, 255, 255, 0.9); /* Very light white */
+    --dark-color: rgba(0, 0, 0, 0.8); /* Dark black for contrast */
+    --gray-100: rgba(248, 249, 250, 0.8);
+    --gray-200: rgba(233, 236, 239, 0.7);
+    --gray-300: rgba(222, 226, 230, 0.6);
+    --gray-400: rgba(206, 212, 218, 0.8);
+    --gray-500: rgba(173, 181, 189, 0.8);
+    --gray-600: rgba(255, 255, 255, 0.6);
+    --gray-700: rgba(255, 255, 255, 0.7);
+    --gray-800: rgba(255, 255, 255, 0.8);
+    --gray-900: rgba(255, 255, 255, 0.9);
+    --body-bg: #0a0e17; /* Very dark blue-black like in image */
+    --text-color: #ffffff; /* White text for readability on dark backgrounds */
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* Shadow for glass effect */
+    --glass-border: 1px solid rgba(255, 255, 255, 0.18); /* Subtle border for glass effect */
+    --border-radius: 16px; /* Rounded corners like in image */
     --transition: all 0.3s ease;
 }
 
@@ -37,21 +40,69 @@
 
 body {
     font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #ffc0cb 0%, #ffffff 100%);
+    background-color: var(--body-bg);
     color: var(--text-color);
     line-height: 1.6;
+    position: relative;
+    overflow-x: hidden;
+}
+/*
+Decorative Background Circles (like in image)
+body::before, body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    z-index: -1;
+    filter: blur(10px);
 }
 
+body::before {
+    width: 300px;
+    height: 300px;
+    background: var(--accent-red);
+    top: 10%;
+    right: 10%;
+}
+
+body::after {
+    width: 250px;
+    height: 250px;
+    background: var(--accent-blue);
+    bottom: 10%;
+    left: 10%;
+}
+*/
 /* App Container */
 .app-container {
     display: flex;
     min-height: 100vh;
+    position: relative;
+    z-index: 1;
+}
+
+/* Glassmorphism Card Effect (applied to all card-like elements) */
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: var(--border-radius);
+    border: var(--glass-border);
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    transition: var(--transition);
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
 }
 
 /* Sidebar */
 .sidebar {
     width: 250px;
-    background-color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.03); /* Very subtle glass effect */
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
     color: white;
     padding: 1.5rem 0;
     box-shadow: var(--shadow);
@@ -59,6 +110,7 @@ body {
     height: 100vh;
     overflow-y: auto;
     z-index: 1000;
+    border-right: var(--glass-border);
 }
 
 .logo {
@@ -88,14 +140,16 @@ body {
     text-decoration: none;
     font-weight: 500;
     transition: var(--transition);
+    border-radius: 8px;
+    margin: 0 0.5rem;
 }
 
 .nav-links a:hover {
-    background-color: var(--primary-dark);
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .nav-links a.active {
-    background-color: var(--primary-light);
+    background-color: rgba(255, 255, 255, 0.15);
     border-left: 4px solid white;
 }
 
@@ -111,15 +165,21 @@ body {
 }
 
 header {
-    background-color: white;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
     box-shadow: var(--shadow);
     padding: 1rem 2rem;
+    border-bottom: var(--glass-border);
+    position: sticky;
+    top: 0;
+    z-index: 900;
 }
 
 header h1 {
     font-size: 1.8rem;
     font-weight: 600;
-    color: var(--primary-color);
+    color: var(--text-color);
 }
 
 .main-content {
@@ -146,7 +206,7 @@ label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
-    color: var(--gray-700);
+    color: var(--gray-400);
 }
 
 input[type="text"],
@@ -155,11 +215,15 @@ select,
 textarea {
     width: 100%;
     padding: 0.75rem;
-    border: 1px solid var(--gray-300);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: var(--border-radius);
     font-family: inherit;
     font-size: 1rem;
     transition: var(--transition);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    color: var(--text-color);
 }
 
 input[type="text"]:focus,
@@ -167,13 +231,13 @@ input[type="date"]:focus,
 select:focus,
 textarea:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(214, 51, 108, 0.2);
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
 }
 
 .submit-btn {
     background-color: var(--primary-color);
-    color: white;
+    color: #000;
     border: none;
     padding: 0.75rem 1.5rem;
     border-radius: var(--border-radius);
@@ -202,9 +266,11 @@ textarea:focus {
 }
 
 .action-btn {
-    background-color: var(--secondary-color);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     color: white;
-    border: none;
+    border: var(--glass-border);
     padding: 0.5rem 1rem;
     border-radius: var(--border-radius);
     font-size: 0.9rem;
@@ -219,7 +285,7 @@ textarea:focus {
 }
 
 .action-btn:hover {
-    background-color: var(--gray-700);
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 /* Loader */
@@ -232,7 +298,7 @@ textarea:focus {
 }
 
 .spinner {
-    border: 4px solid var(--gray-200);
+    border: 4px solid rgba(255, 255, 255, 0.1);
     border-top: 4px solid var(--primary-color);
     border-radius: 50%;
     width: 40px;
@@ -256,7 +322,7 @@ textarea:focus {
     font-size: 1.2rem;
     text-align: center;
     margin-bottom: 2rem;
-    color: var(--gray-700);
+    color: var(--gray-400);
 }
 
 .features-grid {
@@ -266,8 +332,11 @@ textarea:focus {
 }
 
 .feature-card {
-    background-color: white;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
     border-radius: var(--border-radius);
+    border: var(--glass-border);
     padding: 1.5rem;
     box-shadow: var(--shadow);
     text-align: center;
@@ -276,7 +345,7 @@ textarea:focus {
 
 .feature-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(214, 51, 108, 0.15);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
 }
 
 .feature-icon {
@@ -287,7 +356,7 @@ textarea:focus {
 
 .feature-card h3 {
     margin-bottom: 0.8rem;
-    color: var(--gray-800);
+    color: var(--gray-100);
 }
 
 .feature-card p {
@@ -298,7 +367,7 @@ textarea:focus {
 .feature-button {
     display: inline-block;
     background-color: var(--primary-color);
-    color: white;
+    color: #000;
     padding: 0.5rem 1rem;
     border-radius: var(--border-radius);
     text-decoration: none;
@@ -317,16 +386,22 @@ textarea:focus {
 }
 
 .input-section {
-    background-color: white;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
     border-radius: var(--border-radius);
+    border: var(--glass-border);
     padding: 1.5rem;
     box-shadow: var(--shadow);
     margin-bottom: 2rem;
 }
 
 .results-section {
-    background-color: white;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
     border-radius: var(--border-radius);
+    border: var(--glass-border);
     padding: 1.5rem;
     box-shadow: var(--shadow);
 }
@@ -343,15 +418,18 @@ textarea:focus {
 }
 
 .reference-section {
-    background-color: var(--gray-100);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: var(--border-radius);
+    border: var(--glass-border);
     padding: 1rem;
     margin-bottom: 1.5rem;
 }
 
 .reference-section h4 {
     margin-bottom: 0.5rem;
-    color: var(--gray-700);
+    color: var(--gray-400);
     font-weight: 600;
 }
 
@@ -372,7 +450,7 @@ textarea:focus {
 }
 
 .context-section details {
-    border: 1px solid var(--gray-300);
+    border: var(--glass-border);
     border-radius: var(--border-radius);
     padding: 0.8rem;
 }
@@ -386,7 +464,9 @@ textarea:focus {
 .context-content {
     margin-top: 1rem;
     padding: 1rem;
-    background-color: var(--gray-100);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: var(--border-radius);
     font-size: 0.9rem;
     line-height: 1.6;
@@ -468,22 +548,25 @@ textarea:focus {
 }
 
 .filter-btn {
-    background-color: var(--gray-200);
-    border: none;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: var(--glass-border);
     padding: 0.5rem 1rem;
     border-radius: var(--border-radius);
     cursor: pointer;
     font-size: 0.9rem;
     transition: var(--transition);
+    color: #fff;
 }
 
 .filter-btn:hover {
-    background-color: var(--gray-300);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .filter-btn.active {
     background-color: var(--primary-color);
-    color: white;
+    color: #000;
 }
 
 .tasks-list {
@@ -495,8 +578,13 @@ textarea:focus {
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    border-bottom: 1px solid var(--gray-200);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     transition: var(--transition);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    margin-bottom: 0.5rem;
+    border-radius: 10px;
 }
 
 .task-item:last-child {
@@ -547,6 +635,7 @@ textarea:focus {
     display: block;
     font-size: 1rem;
     margin-bottom: 0.3rem;
+    color: var(--gray-100);
 }
 
 .due-date {
@@ -570,24 +659,30 @@ textarea:focus {
 }
 
 .priority-low {
-    background-color: var(--info-color);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     color: white;
 }
 
 .priority-medium {
-    background-color: var(--warning-color);
-    color: var(--gray-800);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    color: white;
 }
 
 .priority-high {
-    background-color: var(--danger-color);
-    color: white;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    color: black;
 }
 
 .delete-btn {
     background: none;
     border: none;
-    color: var(--danger-color);
+    color: white;
     cursor: pointer;
     padding: 0.3rem;
     font-size: 0.9rem;
@@ -595,7 +690,7 @@ textarea:focus {
 }
 
 .delete-btn:hover {
-    color: var(--danger-color);
+    color: rgba(255, 255, 255, 0.7);
     transform: scale(1.1);
 }
 
@@ -608,6 +703,44 @@ textarea:focus {
     text-align: center;
     padding: 2rem;
     color: var(--gray-600);
+}
+
+/* Time Card - Similar to the design in the image */
+.time-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: var(--border-radius);
+    border: var(--glass-border);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    text-align: center;
+    max-width: 400px;
+    margin: 2rem auto;
+}
+
+.time-card .day {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 1rem;
+    color: var(--gray-400);
+    margin-bottom: 0.5rem;
+}
+
+.time-card .time {
+    font-size: 3rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+}
+
+.time-card .time span {
+    font-size: 2rem;
+    vertical-align: middle;
+}
+
+.time-card .period {
+    font-size: 1.5rem;
+    margin-left: 0.5rem;
 }
 
 /* Responsive Design */
@@ -679,5 +812,9 @@ textarea:focus {
     
     .task-actions {
         justify-content: space-between;
+    }
+    
+    .time-card .time {
+        font-size: 2.5rem;
     }
 }

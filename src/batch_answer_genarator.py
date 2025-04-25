@@ -53,7 +53,7 @@ def process_csv(input_csv_path, output_csv_path, collection_name):
     print(f"Processed data saved to {output_csv_path}")
 
 if __name__ == "__main__":
-    input_csv_path = 'data/questions.csv'  # Replace with your input CSV file path
-    output_csv_path = 'processed_data/output(questions).csv'  # Replace with your desired output CSV file path
+    input_csv_path = 'data/future_minds_submission.csv'  # Replace with your input CSV file path
+    output_csv_path = 'processed_data/output.csv'  # Replace with your desired output CSV file path
     collection_name = "textbook"  # Replace with your ChromaDB collection name
     process_csv(input_csv_path, output_csv_path, collection_name)
