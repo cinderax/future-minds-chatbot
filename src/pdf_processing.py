@@ -327,11 +327,11 @@ def get_user_inputs() -> Tuple[str, int, int, str]:
         print("Error: The file is not a valid PDF. Please provide a PDF file.")
         exit(1)
 
-    chunk_size_input = input("\nChunk Size(Default-> 300-400): ").strip()
-    chunk_size = int(chunk_size_input) if chunk_size_input else 300  # Default to 300 if no input
+    chunk_size_input = input("\nChunk Size(Default-> 1000): ").strip()
+    chunk_size = int(chunk_size_input) if chunk_size_input else 1000  # Default to 300 if no input
 
-    chunk_overlap_input = input("\nChunk_overlap(Default-> 50-100): ").strip()
-    chunk_overlap = int(chunk_overlap_input) if chunk_overlap_input else 75  # Default to 75 if no input
+    chunk_overlap_input = input("\nChunk_overlap(Default-> 250): ").strip()
+    chunk_overlap = int(chunk_overlap_input) if chunk_overlap_input else 250  # Default to 75 if no input
 
     file_name = input("\nIn which name we should save Chunks? ").strip()
 
