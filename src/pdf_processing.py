@@ -4,7 +4,7 @@
 import os
 import re
 import json
-from typing import List, Dict, Tuple, Any
+from typing import List, Dict, Tuple, Any, Optional
 import pdfplumber
 import csv
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -33,13 +33,21 @@ class TextbookProcessor:
         self.pages_metadata = []
         self.chunks = []
         self.chunks_metadata = []
+        
+        # Keep track of current chapter/section across pages
+        self.current_chapter = ""
+        self.current_section = ""
+        self.current_subsection = ""
 
     def extract_text_from_pdf(self) -> None:
         """Extract text and metadata from each page of the PDF."""
         print(f"\nExtracting text from {self.pdf_path}...")
 
         with pdfplumber.open(self.pdf_path) as pdf:
+            total_pages = len(pdf.pages)
             for i, page in enumerate(pdf.pages):
+                print(f"Processing page {i+1}/{total_pages}", end="\r")
+                
                 # Extract text from page
                 text = page.extract_text()
                 if text:
@@ -47,18 +55,29 @@ class TextbookProcessor:
                     text = self._clean_text(text)
 
                     # Extract section information using regex patterns
-                    section_info = self._extract_section_info(text)
+                    section_info = self._extract_section_info(text, i + 1)
+                    
+                    # Update current chapter/section if found
+                    if section_info.get("chapter"):
+                        self.current_chapter = section_info["chapter"]
+                    if section_info.get("section"):
+                        self.current_section = section_info["section"]
+                    if section_info.get("subsection"):
+                        self.current_subsection = section_info["subsection"]
+                    
+                    # Use the latest chapter/section info
+                    metadata = {
+                        "page_number": i + 1,
+                        "section": self.current_section,
+                        "subsection": self.current_subsection,
+                        "chapter": self.current_chapter
+                    }
 
                     # Store text and metadata
                     self.pages_text.append(text)
-                    self.pages_metadata.append({
-                        "page_number": i + 1,
-                        "section": section_info.get("section", ""),
-                        "subsection": section_info.get("subsection", ""),
-                        "chapter": section_info.get("chapter", "")
-                    })
+                    self.pages_metadata.append(metadata)
 
-        print(f"Extracted {len(self.pages_text)} pages of text.")
+        print(f"\nExtracted {len(self.pages_text)} pages of text.")
 
         # Save raw extracted text for reference
         with open(os.path.join(self.output_dir, self.raw_pages_file_name), "w", encoding="utf-8") as f:
@@ -69,38 +88,70 @@ class TextbookProcessor:
 
     def _clean_text(self, text: str) -> str:
         """Clean extracted text by removing headers, footers, and excess whitespace."""
-        # Remove common header/footer patterns (customize based on your PDF)
-        text = re.sub(r'Page \d+ of \d+', '', text)
-
-        # Remove extra whitespace
-        text = re.sub(r'\s+', ' ', text)
-        text = re.sub(r'^\s+|\s+$', '', text, flags=re.MULTILINE)
-
+        # Remove common header/footer patterns
+        text = re.sub(r'Page\s+\d+\s+of\s+\d+', '', text)
+        
+        # Remove page numbers that appear alone on a line
+        text = re.sub(r'^\s*\d+\s*$', '', text, flags=re.MULTILINE)
+        
+        # Remove common footer text patterns
+        text = re.sub(r'Copyright © \d{4}.*', '', text, flags=re.MULTILINE)
+        
+        # Remove excessive whitespace while preserving paragraph breaks
+        text = re.sub(r'\n{3,}', '\n\n', text)  # Replace excessive newlines
+        text = re.sub(r' {2,}', ' ', text)  # Replace multiple spaces
+        
         return text.strip()
 
-    def _extract_section_info(self, text: str) -> Dict[str, str]:
+    def _extract_section_info(self, text: str, page_number: int) -> Dict[str, str]:
         """
         Extract section, subsection, and chapter information from text.
-
-        Note:
-            The `chapter_pattern` and `section_pattern` regex patterns are examples and may not work for all textbook structures.
-            Users should customize these patterns based on the specific format and structure of their PDF.
+        Uses multiple regex patterns to identify different textbook formatting styles.
         """
         section_info = {}
-
-        # Example patterns - customize based on your textbook's structure
-        chapter_pattern = r'Chapter\s+(\d+)[:\s]+(.*?)(?=\n|$)'
-        section_pattern = r'(\d+\.\d+)\s+(.*?)(?=\n|$)'
-
-        # Extract chapter
-        chapter_match = re.search(chapter_pattern, text)
-        if chapter_match:
-            section_info["chapter"] = f"{chapter_match.group(1)}: {chapter_match.group(2)}"
-
-        # Extract section
-        section_match = re.search(section_pattern, text)
-        if section_match:
-            section_info["section"] = f"{section_match.group(1)} {section_match.group(2)}"
+        
+        # Multiple chapter patterns to handle different formats
+        chapter_patterns = [
+            r'(?:^|\n)(?:Chapter|CHAPTER)\s+(\d+)[:\.\s]+(.+?)(?=\n|$)',  # Standard "Chapter X: Title"
+            r'(?:^|\n)(\d+)\.\s+(.+?)(?=\n\d+\.\d+|\n|$)',  # Format like "1. Chapter Title"
+        ]
+        
+        # Multiple section patterns
+        section_patterns = [
+            r'(?:^|\n)(\d+\.\d+)\s+(.+?)(?=\n|$)',  # Standard decimal "1.1 Section Title"
+            r'(?:^|\n)(\d+\.\d+\.\d+)\s+(.+?)(?=\n|$)',  # Deep section like "1.1.2 Subsection"
+            r'(?:^|\n)(?:Section|SECTION)\s+(\d+\.\d+)[:\.\s]+(.+?)(?=\n|$)',  # Explicit "Section 1.1: Title"
+        ]
+        
+        # Try all chapter patterns
+        for pattern in chapter_patterns:
+            chapter_match = re.search(pattern, text)
+            if chapter_match:
+                section_info["chapter"] = f"Chapter {chapter_match.group(1)}: {chapter_match.group(2).strip()}"
+                break
+        
+        # Try all section patterns for main sections
+        for pattern in section_patterns:
+            section_matches = re.finditer(pattern, text)
+            for match in section_matches:
+                section_num = match.group(1)
+                # Check if it's a subsection (has two decimal points)
+                if section_num.count('.') > 1:
+                    section_info["subsection"] = f"{section_num} {match.group(2).strip()}"
+                else:
+                    section_info["section"] = f"{section_num} {match.group(2).strip()}"
+        
+        # If we still don't have sections, try more generic headings (all caps, etc.)
+        if not section_info.get("section") and not section_info.get("chapter"):
+            heading_pattern = r'(?:^|\n)([A-Z][A-Z\s]+[A-Z])(?:\n|$)'
+            heading_match = re.search(heading_pattern, text)
+            if heading_match:
+                heading = heading_match.group(1).strip()
+                # Determine if it's likely a chapter or section based on length and content
+                if len(heading) < 30 and any(word in heading for word in ["CHAPTER", "INTRODUCTION", "APPENDIX"]):
+                    section_info["chapter"] = heading
+                else:
+                    section_info["section"] = heading
 
         return section_info
 
@@ -115,9 +166,6 @@ class TextbookProcessor:
             chunk_size: Target size of each chunk in characters
             chunk_overlap: Overlap between chunks in characters
             file_name: Base filename for saving output
-
-        Notes:
-            Prepends chapter and section headings as a header inside each chunk's text.
         """
         print(f"Chunking text with size={chunk_size}, overlap={chunk_overlap}...")
 
@@ -138,7 +186,7 @@ class TextbookProcessor:
                 heading_parts.append(metadata["section"])
             if metadata.get("subsection"):
                 heading_parts.append(metadata["subsection"])
-            heading_prefix = " | ".join(heading_parts)
+            heading_prefix = " | ".join(filter(None, heading_parts))  # Filter out empty strings
             if heading_prefix:
                 heading_prefix = f"[{heading_prefix}]"
 
@@ -180,7 +228,7 @@ class TextbookProcessor:
         with open(os.path.join(self.output_dir, f"{file_name}.json"), "w", encoding="utf-8") as f:
             json.dump({"chunks": combined_chunks}, f, indent=2)
 
-        # Save metadata and chunk text separately as CSV (optional)
+        # Save metadata and chunk text separately as CSV
         with open(os.path.join(self.output_dir, f"{file_name}.csv"), mode="w", newline="", encoding="utf-8") as csv_file:
             fieldnames = ["chunk_id", "page_number", "section", "subsection", "chapter", "chunk_index", "chunk_content"]
             writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
@@ -198,6 +246,34 @@ class TextbookProcessor:
 
         print(f"Chunks and metadata saved to {self.output_dir} folder.")
 
+    def analyze_structure(self) -> Dict[str, Any]:
+        """Analyze the structure of the PDF to better understand its format."""
+        chapter_count = 0
+        section_count = 0
+        subsection_count = 0
+        
+        # Count unique chapters and sections
+        chapters = set()
+        sections = set()
+        subsections = set()
+        
+        for meta in self.pages_metadata:
+            if meta.get("chapter"):
+                chapters.add(meta["chapter"])
+            if meta.get("section"):
+                sections.add(meta["section"])
+            if meta.get("subsection"):
+                subsections.add(meta["subsection"])
+        
+        return {
+            "total_pages": len(self.pages_text),
+            "unique_chapters": len(chapters),
+            "unique_sections": len(sections),
+            "unique_subsections": len(subsections),
+            "chapters": list(chapters)[:5],  # Show first 5 chapters as samples
+            "sections": list(sections)[:5],  # Show first 5 sections as samples
+        }
+
     def process(self, chunk_size: int, chunk_overlap: int, file_name: str) -> Tuple[List[str], List[Dict[str, Any]]]:
         """
         Process the PDF: extract text, clean it, and split into chunks.
@@ -205,11 +281,33 @@ class TextbookProcessor:
         Args:
             chunk_size: Target size of each chunk in characters
             chunk_overlap: Overlap between chunks in characters
+            file_name: Base filename for saving output
 
         Returns:
             Tuple of (chunks, chunks_metadata)
         """
         self.extract_text_from_pdf()
+        
+        # Analyze and show structure information
+        structure_info = self.analyze_structure()
+        print("\nDocument Structure Analysis:")
+        print(f"Total Pages: {structure_info['total_pages']}")
+        print(f"Unique Chapters: {structure_info['unique_chapters']}")
+        print(f"Unique Sections: {structure_info['unique_sections']}")
+        print(f"Unique Subsections: {structure_info['unique_subsections']}")
+        
+        # If no chapters or sections were found, warn the user
+        if structure_info['unique_chapters'] == 0 and structure_info['unique_sections'] == 0:
+            print("\nWARNING: No chapters or sections were detected. The PDF might have a non-standard format.")
+            print("You may need to customize the regex patterns in _extract_section_info() method.")
+            
+            # Ask if the user wants to continue
+            response = input("\nContinue with chunking anyway? (y/n): ").strip().lower()
+            if response != 'y':
+                print("Processing canceled.")
+                return self.chunks, self.chunks_metadata
+        
+        # Continue with chunking
         self.chunk_text(chunk_size, chunk_overlap, file_name)
         return self.chunks, self.chunks_metadata
 

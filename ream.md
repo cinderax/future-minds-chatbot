@@ -1,4 +1,0 @@
--read me eka edit karan
-- font end eka hadan
-- poddak balan agentla tika set da kiyal
-- pdf chunker eka wenas karanna one
