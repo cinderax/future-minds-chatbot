@@ -1,8 +1,11 @@
+/* Import Poppins font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
 /* Base Styles */
 :root {
-    --primary-color: #4a6fa5;
-    --primary-dark: #385d8a;
-    --primary-light: #5b7fb5;
+    --primary-color: #d6336c; /* Pink */
+    --primary-dark: #a82a55;
+    --primary-light: #e85a8a;
     --secondary-color: #6c757d;
     --success-color: #28a745;
     --danger-color: #dc3545;
@@ -19,9 +22,9 @@
     --gray-700: #495057;
     --gray-800: #343a40;
     --gray-900: #212529;
-    --body-bg: #f5f7fa;
-    --text-color: #333;
-    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --body-bg: #fff0f6; /* subtle pinkish white */
+    --text-color: #4a4a4a; /* dark gray for readability */
+    --shadow: 0 2px 8px rgba(214, 51, 108, 0.15); /* pinkish shadow */
     --border-radius: 8px;
     --transition: all 0.3s ease;
 }
@@ -33,8 +36,8 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--body-bg);
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #ffc0cb 0%, #ffffff 100%);
     color: var(--text-color);
     line-height: 1.6;
 }
@@ -165,7 +168,7 @@ select:focus,
 textarea:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+    box-shadow: 0 0 0 3px rgba(214, 51, 108, 0.2);
 }
 
 .submit-btn {
@@ -273,7 +276,7 @@ textarea:focus {
 
 .feature-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 15px rgba(214, 51, 108, 0.15);
 }
 
 .feature-icon {
@@ -503,178 +506,4 @@ textarea:focus {
 .task-content {
     display: flex;
     align-items: center;
-    flex: 1;
-}
-
-.task-checkbox {
-    margin-right: 1rem;
-}
-
-.task-checkbox input[type="checkbox"] {
-    display: none;
-}
-
-.task-checkbox label {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--primary-color);
-    border-radius: 4px;
-    position: relative;
-    cursor: pointer;
-}
-
-.task-checkbox input[type="checkbox"]:checked + label::after {
-    content: '\f00c';
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: var(--primary-color);
-    font-size: 0.8rem;
-}
-
-.task-info {
-    flex: 1;
-}
-
-.task-description {
-    display: block;
-    font-size: 1rem;
-    margin-bottom: 0.3rem;
-}
-
-.due-date {
-    display: block;
-    font-size: 0.8rem;
-    color: var(--gray-600);
-}
-
-.task-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.priority-badge {
-    padding: 0.2rem 0.5rem;
-    border-radius: 10px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    text-transform: capitalize;
-}
-
-.priority-low {
-    background-color: var(--info-color);
-    color: white;
-}
-
-.priority-medium {
-    background-color: var(--warning-color);
-    color: var(--gray-800);
-}
-
-.priority-high {
-    background-color: var(--danger-color);
-    color: white;
-}
-
-.delete-btn {
-    background: none;
-    border: none;
-    color: var(--danger-color);
-    cursor: pointer;
-    padding: 0.3rem;
-    font-size: 0.9rem;
-    transition: var(--transition);
-}
-
-.delete-btn:hover {
-    color: var(--danger-color);
-    transform: scale(1.1);
-}
-
-.task-item.completed .task-description {
-    text-decoration: line-through;
-    color: var(--gray-500);
-}
-
-.no-tasks {
-    text-align: center;
-    padding: 2rem;
-    color: var(--gray-600);
-}
-
-/* Responsive Design */
-@media (max-width: 992px) {
-    .sidebar {
-        width: 200px;
-    }
-    
-    .content {
-        margin-left: 200px;
-    }
-}
-
-@media (max-width: 768px) {
-    .sidebar {
-        width: 60px;
-        padding: 1rem 0;
-    }
-    
-    .content {
-        margin-left: 60px;
-    }
-    
-    .logo h2 {
-        display: none;
-    }
-    
-    .nav-links a {
-        padding: 0.8rem;
-        justify-content: center;
-    }
-    
-    .nav-links a i {
-        margin-right: 0;
-    }
-    
-    .nav-links a span {
-        display: none;
-    }
-    
-    .form-row {
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-    
-    .features-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 576px) {
-    .main-content {
-        padding: 1rem;
-    }
-    
-    header {
-        padding: 1rem;
-    }
-    
-    header h1 {
-        font-size: 1.5rem;
-    }
-    
-    .task-item {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1rem;
-    }
-    
-    .task-actions {
-        justify-content: space-between;
-    }
-}
+    flex:
