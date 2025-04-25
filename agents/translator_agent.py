@@ -65,11 +65,9 @@ class TranslatorAgent:
             return {"error": f"Unsupported language code: {target_language}"}
             
         prompt = f"""
-Translate the following text into {language_name}. 
-Maintain the original meaning, tone, and formatting as closely as possible.
-If there are specific cultural references or idioms, adapt them appropriately for the target language.
+Translate the following text into {language_name}. Use only that language, except for proper nouns or names, which should remain in English. Preserve meaning, tone, and formatting. Adapt cultural references or idioms as needed.
 
-Text to translate:
+Text:
 {text}
 
 Translation ({language_name}):

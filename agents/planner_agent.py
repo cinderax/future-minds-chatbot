@@ -23,8 +23,6 @@ class PlannerAgent:
 
         self.model = genai.GenerativeModel(model_name)
         
-        # Storage for plans (in-memory only for this example)
-        # In a production app, you'd use a database
         self.plans = {}
 
     def create_plan(self, goal, deadline=None):
@@ -54,7 +52,16 @@ Please include:
 4. Potential challenges and how to overcome them
 5. Key milestones to track progress
 
-Format the plan in a clear, structured way that's easy to follow.
+Please format the plan with:
+
+- Clear markdown headings and subheadings
+- Numbered steps and timelines
+- Bold important points and milestones
+- A table summarizing the timeline
+- Short, concise paragraphs for readability
+- A summary section with key takeaways at the end
+
+Make the output professional and visually appealing.
 """
 
         response = self.model.generate_content(prompt)
