@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+
+{% block title %}RAG Assistant - To-Do List{% endblock %}
+
+{% block header %}To-Do List{% endblock %}
+
+{% block content %}
+<div class="todo-container">
+    <div class="input-section">
+        <form id="todo-form">
+            <div class="form-group">
+                <label for="task">New Task:</label>
+                <input type="text" id="task" name="task" placeholder="Enter a new task...">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="due-date">Due Date (optional):</label>
+                    <input type="date" id="due-date" name="due_date">
+                </div>
+                
+                <div class="form-group">
+                    <label for="priority">Priority:</label>
+                    <select id="priority" name="priority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-plus"></i> Add Task
+            </button>
+        </form>
+    </div>
+    
+    <div class="tasks-section">
+        <div class="filter-options">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="active">Active</button>
+            <button class="filter-btn" data-filter="completed">Completed</button>
+        </div>
+        
+        <div class="loader" id="loader" style="display: none;">
+            <div class="spinner"></div>
+            <p>Loading tasks...</p>
+        </div>
+        
+        <div class="no-tasks" id="no-tasks" style="display: none;">
+            <p>No tasks available. Add a new task to get started!</p>
+        </div>
+        
+        <ul class="tasks-list" id="tasks-list"></ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const todoForm = document.getElementById('todo-form');
+    const tasksList = document.getElementById('tasks-list');
+    const loader = document.getElementById('loader');
+    const noTasks = document.getElementById('no-tasks');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    let currentFilter = 'all';
+    
+    // Load tasks on page load
+    loadTasks();
+    
+    // Add new task
+    todoForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const task = document.getElementById('task').value.trim();
+        const dueDate = document.getElementById('due-date').value;
+        const priority = document.getElementById('priority').value;
+        
+        if (!task) {
+            alert('Please enter a task.');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/todo/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    task: task,
+                    due_date: dueDate,
+                    priority: priority
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            // Clear form
+            todoForm.reset();
+            
+            // Reload tasks
+            loadTasks();
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert(`Error: ${error.message || 'Failed to add task'}`);
+        }
+    });
+    
+    // Filter tasks
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const filter = this.getAttribute('data-filter');
+            currentFilter = filter;
+            
+            // Update active button
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Filter tasks
+            const tasks = document.querySelectorAll('.task-item');
+            tasks.forEach(task => {
+                if (filter === 'all') {
+                    task.style.display = 'flex';
+                } else if (filter === 'active') {
+                    const isCompleted = task.classList.contains('completed');
+                    task.style.display = isCompleted ? 'none' : 'flex';
+                } else if (filter === 'completed') {
+                    const isCompleted = task.classList.contains('completed');
+                    task.style.display = isCompleted ? 'flex' : 'none';
+                }
+            });
+            
+            // Check if no tasks are visible
+            checkNoVisibleTasks();
+        });
+    });
+    
+    // Load tasks from API
+    async function loadTasks() {
+        showLoader();
+        
+        try {
+            const response = await fetch('/api/todo/get');
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            renderTasks(data.todos);
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert(`Error: ${error.message || 'Failed to load tasks'}`);
+        }
+    }
+    
+    // Render tasks to the DOM
+    function renderTasks(tasks) {
+        tasksList.innerHTML = '';
+        
+        if (tasks.length === 0) {
+            hideLoader();
+            noTasks.style.display = 'block';
+            return;
+        }
+        
+        tasks.forEach(task => {
+            const taskElement = document.createElement('li');
+            taskElement.className = `task-item ${task.completed ? 'completed' : ''}`;
+            taskElement.setAttribute('data-id', task.id);
+            
+            const priorityClass = `priority-${task.priority}`;
+            
+            let dueDateText = '';
+            if (task.due_date) {
+                const dueDate = new Date(task.due_date);
+                dueDateText = `<span class="due-date">Due: ${dueDate.toLocaleDateString()}</span>`;
+            }
+            
+            taskElement.innerHTML = `
+                <div class="task-content">
+                    <div class="task-checkbox">
+                        <input type="checkbox" id="task-${task.id}" ${task.completed ? 'checked' : ''}>
+                        <label for="task-${task.id}"></label>
+                    </div>
+                    <div class="task-info">
+                        <span class="task-description">${task.description}</span>
+                        ${dueDateText}
+                    </div>
+                </div>
+                <div class="task-actions">
+                    <span class="priority-badge ${priorityClass}">${task.priority}</span>
+                    <button class="delete-btn" title="Delete Task">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            tasksList.appendChild(taskElement);
+            
+            // Add event listener for checkbox
+            const checkbox = taskElement.querySelector(`#task-${task.id}`);
+            checkbox.addEventListener('change', function() {
+                toggleTaskCompletion(task.id, this.checked);
+            });
+            
+            // Add event listener for delete button
+            const deleteBtn = taskElement.querySelector('.delete-btn');
+            deleteBtn.addEventListener('click', function() {
+                deleteTask(task.id);
+            });
+        });
+        
+        hideLoader();
+        noTasks.style.display = 'none';
+        
+        // Apply current filter
+        applyCurrentFilter();
+    }
+    
+    // Apply the current filter to tasks
+    function applyCurrentFilter() {
+        const tasks = document.querySelectorAll('.task-item');
+        tasks.forEach(task => {
+            if (currentFilter === 'all') {
+                task.style.display = 'flex';
+            } else if (currentFilter === 'active') {
+                const isCompleted = task.classList.contains('completed');
+                task.style.display = isCompleted ? 'none' : 'flex';
+            } else if (currentFilter === 'completed') {
+                const isCompleted = task.classList.contains('completed');
+                task.style.display = isCompleted ? 'flex' : 'none';
+            }
+        });
+        
+        // Check if no tasks are visible
+        checkNoVisibleTasks();
+    }
+    
+    // Check if no tasks are visible after filtering
+    function checkNoVisibleTasks() {
+        const visibleTasks = document.querySelectorAll('.task-item[style="display: flex;"]');
+        if (visibleTasks.length === 0) {
+            noTasks.style.display = 'block';
+        } else {
+            noTasks.style.display = 'none';
+        }
+    }
+    
+    // Toggle task completion status
+    async function toggleTaskCompletion(taskId, completed) {
+        try {
+            const response = await fetch('/api/todo/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    id: taskId,
+                    completed: completed
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            // Update task element in DOM
+            const taskElement = document.querySelector(`.task-item[data-id="${taskId}"]`);
+            if (completed) {
+                taskElement.classList.add('completed');
+            } else {
+                taskElement.classList.remove('completed');
+            }
+            
+            // Apply current filter
+            applyCurrentFilter();
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert(`Error: ${error.message || 'Failed to update task'}`);
+            
+            // Reset checkbox to previous state
+            const checkbox = document.querySelector(`#task-${taskId}`);
+            checkbox.checked = !completed;
+        }
+    }
+    
+    // Delete a task
+    async function deleteTask(taskId) {
+        if (!confirm('Are you sure you want to delete this task?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/todo/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: taskId })
+            });
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            // Remove task element from DOM
+            const taskElement = document.querySelector(`.task-item[data-id="${taskId}"]`);
+            taskElement.remove();
+            
+            // Check if no tasks are visible
+            checkNoVisibleTasks();
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert(`Error: ${error.message || 'Failed to delete task'}`);
+        }
+    }
+    
+    // Show loader
+    function showLoader() {
+        loader.style.display = 'flex';
+        tasksList.style.display = 'none';
+        noTasks.style.display = 'none';
+    }
+    
+    // Hide loader
+    function hideLoader() {
+        loader.style.display = 'none';
+        tasksList.style.display = 'block';
+    }
+});
+</script>
+{% endblock %}

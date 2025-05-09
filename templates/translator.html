@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}RAG Assistant - Translator{% endblock %}
+
+{% block header %}Language Translator{% endblock %}
+
+{% block content %}
+<div class="translator-container">
+    <div class="input-section">
+        <form id="translator-form">
+            <div class="form-group">
+                <label for="text">Text to translate:</label>
+                <textarea id="text" name="text" rows="6" placeholder="Enter the text you want to translate..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="target-language">Target language:</label>
+                <select id="target-language" name="target_language">
+                    <option value="en">English</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                    <option value="it">Italian</option>
+                    <option value="pt">Portuguese</option>
+                    <option value="ru">Russian</option>
+                    <option value="ja">Japanese</option>
+                    <option value="ko">Korean</option>
+                    <option value="zh">Chinese</option>
+                    <option value="ar">Arabic</option>
+                    <option value="hi">Hindi</option>
+                    <option value="bn">Bengali</option>
+                    <option value="si">Sinhala</option>
+                    <option value="ta">Tamil</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-language"></i> Translate
+            </button>
+        </form>
+    </div>
+    
+    <div class="results-section" id="results-section" style="display: none;">
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p>Translating...</p>
+        </div>
+        
+        <div class="translation-container" id="translation-container" style="display: none;">
+            <h3>Translation (<span id="language-name"></span>)</h3>
+            <div class="translation-content" id="translation-content"></div>
+            
+            <div class="action-buttons">
+                <button id="copy-btn" class="action-btn">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const translatorForm = document.getElementById('translator-form');
+    const resultsSection = document.getElementById('results-section');
+    const loader = document.getElementById('loader');
+    const translationContainer = document.getElementById('translation-container');
+    const languageName = document.getElementById('language-name');
+    const translationContent = document.getElementById('translation-content');
+    const copyBtn = document.getElementById('copy-btn');
+    
+    translatorForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const text = document.getElementById('text').value.trim();
+        const targetLanguage = document.getElementById('target-language').value;
+        
+        if (!text) {
+            alert('Please enter text to translate.');
+            return;
+        }
+        
+        // Show results section and loader
+        resultsSection.style.display = 'block';
+        loader.style.display = 'flex';
+        translationContainer.style.display = 'none';
+        
+        // Scroll to results
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+        
+        try {
+            const response = await fetch('/api/translate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    text: text,
+                    target_language: targetLanguage
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            // Display the translation
+            languageName.textContent = data.target_language_name;
+            translationContent.innerHTML = data.translation.replace(/\n/g, '<br>');
+            
+            // Hide loader and show translation
+            loader.style.display = 'none';
+            translationContainer.style.display = 'block';
+            
+        } catch (error) {
+            console.error('Error:', error);
+            translationContent.innerHTML = `<p class="error">Error: ${error.message || 'Failed to translate text'}</p>`;
+            loader.style.display = 'none';
+            translationContainer.style.display = 'block';
+        }
+    });
+    
+    // Copy to clipboard functionality
+    copyBtn.addEventListener('click', function() {
+        const textToCopy = translationContent.innerText;
+        navigator.clipboard.writeText(textToCopy)
+            .then(() => {
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                }, 2000);
+            })
+            .catch(err => {
+                console.error('Failed to copy text:', err);
+                alert('Failed to copy text to clipboard');
+            });
+    });
+});
+</script>
+{% endblock %}

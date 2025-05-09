@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}RAG Assistant - Task Planner{% endblock %}
+
+{% block header %}Task Planner{% endblock %}
+
+{% block content %}
+<div class="planner-container">
+    <div class="input-section">
+        <form id="planner-form">
+            <div class="form-group">
+                <label for="goal">What's your goal?</label>
+                <textarea id="goal" name="goal" rows="3" placeholder="Describe the goal you want to achieve..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="deadline">Deadline (optional):</label>
+                <input type="date" id="deadline" name="deadline">
+            </div>
+            
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-tasks"></i> Create Plan
+            </button>
+        </form>
+    </div>
+    
+    <div class="results-section" id="results-section" style="display: none;">
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p>Creating your plan...</p>
+        </div>
+        
+        <div class="plan-container" id="plan-container" style="display: none;">
+            <div class="plan-header">
+                <h3>Your Action Plan</h3>
+                <p class="plan-goal" id="plan-goal"></p>
+                <p class="plan-deadline" id="plan-deadline"></p>
+            </div>
+            
+            <div class="plan-content" id="plan-content"></div>
+            
+            <div class="action-buttons">
+                <button id="copy-btn" class="action-btn">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+                <button id="print-btn" class="action-btn">
+                    <i class="fas fa-print"></i> Print
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const plannerForm = document.getElementById('planner-form');
+    const resultsSection = document.getElementById('results-section');
+    const loader = document.getElementById('loader');
+    const planContainer = document.getElementById('plan-container');
+    const planGoal = document.getElementById('plan-goal');
+    const planDeadline = document.getElementById('plan-deadline');
+    const planContent = document.getElementById('plan-content');
+    const copyBtn = document.getElementById('copy-btn');
+    const printBtn = document.getElementById('print-btn');
+    
+    plannerForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const goal = document.getElementById('goal').value.trim();
+        const deadline = document.getElementById('deadline').value;
+        
+        if (!goal) {
+            alert('Please enter a goal.');
+            return;
+        }
+        
+        // Show results section and loader
+        resultsSection.style.display = 'block';
+        loader.style.display = 'flex';
+        planContainer.style.display = 'none';
+        
+        // Scroll to results
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+        
+        try {
+            const response = await fetch('/api/plan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    goal: goal,
+                    deadline: deadline
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            // Display the plan
+            planGoal.textContent = `Goal: ${data.goal}`;
+            
+            if (data.deadline) {
+                const formattedDate = new Date(data.deadline).toLocaleDateString();
+                planDeadline.textContent = `Deadline: ${formattedDate}`;
+                planDeadline.style.display = 'block';
+            } else {
+                planDeadline.style.display = 'none';
+            }
+            
+            planContent.innerHTML = data.plan_text.replace(/\n/g, '<br>');
+            
+            // Hide loader and show plan
+            loader.style.display = 'none';
+            planContainer.style.display = 'block';
+            
+        } catch (error) {
+            console.error('Error:', error);
+            planContent.innerHTML = `<p class="error">Error: ${error.message || 'Failed to create plan'}</p>`;
+            loader.style.display = 'none';
+            planContainer.style.display = 'block';
+        }
+    });
+    
+    // Copy to clipboard functionality
+    copyBtn.addEventListener('click', function() {
+        const textToCopy = `Goal: ${planGoal.textContent}\n${planDeadline.style.display !== 'none' ? planDeadline.textContent + '\n' : ''}${planContent.innerText}`;
+        
+        navigator.clipboard.writeText(textToCopy)
+            .then(() => {
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                }, 2000);
+            })
+            .catch(err => {
+                console.error('Failed to copy text:', err);
+                alert('Failed to copy text to clipboard');
+            });
+    });
+    
+    // Print functionality
+    printBtn.addEventListener('click', function() {
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Action Plan</title>
+                <style>
+                    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+                    h1 { color: #2c3e50; }
+                    .plan-info { margin-bottom: 20px; }
+                    .plan-content { line-height: 1.6; }
+                </style>
+            </head>
+            <body>
+                <h1>Action Plan</h1>
+                <div class="plan-info">
+                    <p><strong>${planGoal.textContent}</strong></p>
+                    ${planDeadline.style.display !== 'none' ? `<p>${planDeadline.textContent}</p>` : ''}
+                </div>
+                <div class="plan-content">
+                    ${planContent.innerHTML}
+                </div>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
+        }, 250);
+    });
+});
+</script>
+{% endblock %}

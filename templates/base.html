@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RAG Assistant{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    {% block extra_head %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</head>
+<body>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>RAG Assistant</h2>
+            </div>
+            <ul class="nav-links">
+                <li><a href="{{ url_for('index') }}" class="{% if request.path == url_for('index') %}active{% endif %}">
+                    <i class="fas fa-home"></i> Home
+                </a></li>
+                <li><a href="{{ url_for('history') }}" class="{% if request.path == url_for('history') %}active{% endif %}">
+                    <i class="fas fa-book"></i> History Q&A
+                </a></li>
+                <li><a href="{{ url_for('translator') }}" class="{% if request.path == url_for('translator') %}active{% endif %}">
+                    <i class="fas fa-language"></i> Translator
+                </a></li>
+                <li><a href="{{ url_for('summarizer') }}" class="{% if request.path == url_for('summarizer') %}active{% endif %}">
+                    <i class="fas fa-compress-alt"></i> Summarizer
+                </a></li>
+                <li><a href="{{ url_for('planner') }}" class="{% if request.path == url_for('planner') %}active{% endif %}">
+                    <i class="fas fa-tasks"></i> Task Planner
+                </a></li>
+                <li><a href="{{ url_for('todo') }}" class="{% if request.path == url_for('todo') %}active{% endif %}">
+                    <i class="fas fa-check-square"></i> To-Do List
+                </a></li>
+            </ul>
+        </nav>
+        
+        <main class="content">
+            <header>
+                <h1>{% block header %}RAG Assistant{% endblock %}</h1>
+            </header>
+            
+            <div class="main-content">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

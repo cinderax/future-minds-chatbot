@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}RAG Assistant - History Q&A{% endblock %}
+
+{% block header %}History Question & Answer{% endblock %}
+
+{% block content %}
+<div class="history-qa-container">
+    <div class="input-section">
+        <form id="history-form">
+            <div class="form-group">
+                <label for="question">Ask a history question:</label>
+                <textarea id="question" name="question" rows="4" placeholder="e.g., Who were the Wright brothers and what did they accomplish?"></textarea>
+            </div>
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-search"></i> Get Answer
+            </button>
+        </form>
+    </div>
+    
+    <div class="results-section" id="results-section" style="display: none;">
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p>Searching through textbooks...</p>
+        </div>
+        
+        <div class="answer-container" id="answer-container" style="display: none;">
+            <h3>Answer</h3>
+            <div class="answer-content" id="answer-content"></div>
+            
+            <div class="reference-section">
+                <h4>References</h4>
+                <div class="reference-details">
+                    <div class="ref-item">
+                        <span class="ref-label">Sections:</span>
+                        <span id="sections-list"></span>
+                    </div>
+                    <div class="ref-item">
+                        <span class="ref-label">Pages:</span>
+                        <span id="pages-list"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="context-section">
+                <details>
+                    <summary>View Source Context</summary>
+                    <div class="context-content" id="context-content"></div>
+                </details>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const historyForm = document.getElementById('history-form');
+    const resultsSection = document.getElementById('results-section');
+    const loader = document.getElementById('loader');
+    const answerContainer = document.getElementById('answer-container');
+    const answerContent = document.getElementById('answer-content');
+    const sectionsList = document.getElementById('sections-list');
+    const pagesList = document.getElementById('pages-list');
+    const contextContent = document.getElementById('context-content');
+    
+    historyForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const question = document.getElementById('question').value.trim();
+        if (!question) {
+            alert('Please enter a question.');
+            return;
+        }
+        
+        // Show results section and loader
+        resultsSection.style.display = 'block';
+        loader.style.display = 'flex';
+        answerContainer.style.display = 'none';
+        
+        // Scroll to results
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+        
+        try {
+            const response = await fetch('/api/history/answer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ question })
+            });
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            // Display the answer
+            answerContent.innerHTML = data.answer.replace(/\n/g, '<br>');
+            
+            // Display sections and pages
+            sectionsList.textContent = data.sections.length > 0 ? data.sections.join(', ') : 'N/A';
+            pagesList.textContent = data.pages.length > 0 ? data.pages.join(', ') : 'N/A';
+            
+            // Display context
+            contextContent.innerHTML = data.context.replace(/\n/g, '<br>');
+            
+            // Hide loader and show answer
+            loader.style.display = 'none';
+            answerContainer.style.display = 'block';
+            
+        } catch (error) {
+            console.error('Error:', error);
+            answerContent.innerHTML = `<p class="error">Error: ${error.message || 'Failed to get answer'}</p>`;
+            loader.style.display = 'none';
+            answerContainer.style.display = 'block';
+        }
+    });
+});
+</script>
+{% endblock %}
